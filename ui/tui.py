@@ -1,12 +1,10 @@
 import logging
-import asyncio
 from queue import Queue
 from textual.app import App
 from textual import events
 
 from ui.utils import Footbar, Headbar, ChatScreen, TextInput
 from tests import client
-from queue import Queue
 
 
 logging.basicConfig(filename="tui.log", encoding="utf-8", level=logging.DEBUG)
