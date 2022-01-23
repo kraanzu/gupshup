@@ -1,9 +1,11 @@
 import logging
+import os
 from queue import Queue
 from textual.app import App
 from textual import events
 
-from ui.utils import Footbar, Headbar, ChatScreen, TextInput
+from textual.widgets import TreeClick
+from .widgets import Footbar, Headbar, ChatScreen, TextInput, HouseTree
 from tests import client
 
 
@@ -33,14 +35,19 @@ class Tui(App):
         self.ibox.refresh()
 
     async def on_mount(self, _: events.Mount) -> None:
+        x, y = os.get_terminal_size()
         self.headbar = Headbar()
-        self.chatscreen = ChatScreen(queue=self.queue)
-        self.ibox = TextInput()
         self.footbar = Footbar()
+        self.ibox = TextInput()
+        self.chatscreen = ChatScreen(queue=self.queue)
+        self.house_tree = HouseTree("House Tree")
 
         await self.view.dock(self.headbar)
-        await self.view.dock(self.chatscreen, size=25)
-        await self.view.dock(self.footbar, self.ibox, edge="bottom")
+        await self.view.dock(
+            self.house_tree, edge="left", size=int(0.2 * x), name="sidebar"
+        )
+        await self.view.dock(self.chatscreen, size=int(0.85 * y))
+        await self.view.dock(self.ibox, edge="bottom")
 
     async def action_reset_focus(self):
         await self.headbar.focus()
