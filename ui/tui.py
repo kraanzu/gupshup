@@ -4,8 +4,8 @@ from queue import Queue
 from textual.app import App
 from textual import events
 
-from textual.widgets import TreeClick
-from .widgets import Footbar, Headbar, ChatScreen, TextInput, HouseTree
+from textual.widgets import TreeClick, ScrollView
+from .widgets import Footbar, Headbar, ChatScreen, TextInput, HouseTree, MemberList
 from tests import client
 
 
@@ -28,26 +28,33 @@ class Tui(App):
         await self.bind("ctrl+s", "send_message")
 
     async def action_send_message(self):
-        value = self.ibox.value
-        self.chatscreen.push_text(value)
+        value = self.input_box.value
+        self.chat_screen.push_text(value)
         self.client.send(value)
-        self.ibox.value = ""
-        self.ibox.refresh()
+        self.input_box.value = ""
+        self.input_box.refresh()
 
     async def on_mount(self, _: events.Mount) -> None:
         x, y = os.get_terminal_size()
         self.headbar = Headbar()
         self.footbar = Footbar()
-        self.ibox = TextInput()
-        self.chatscreen = ChatScreen(queue=self.queue)
+        self.input_box = TextInput()
+        self.chat_screen = ChatScreen(queue=self.queue)
         self.house_tree = HouseTree("House Tree")
+        self.member_list = MemberList("Member List")
 
-        await self.view.dock(self.headbar)
+        await self.view.dock(self.headbar, name="headbar")
         await self.view.dock(
-            self.house_tree, edge="left", size=int(0.2 * x), name="sidebar"
+            ScrollView(self.member_list),
+            edge="right",
+            size=int(0.15 * x),
+            name="member_list",
         )
-        await self.view.dock(self.chatscreen, size=int(0.85 * y))
-        await self.view.dock(self.ibox, edge="bottom")
+        await self.view.dock(
+            self.house_tree, edge="left", size=int(0.15 * x), name="house_tree"
+        )
+        await self.view.dock(self.chat_screen, size=int(0.85 * y), name="chat_screen")
+        await self.view.dock(self.input_box, edge="bottom", name="input_box")
 
     async def action_reset_focus(self):
         await self.headbar.focus()
