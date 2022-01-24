@@ -4,18 +4,22 @@ from queue import Queue
 from textual.app import App
 from textual import events
 
-from textual.widgets import TreeClick, ScrollView
+from textual.widgets import ScrollView
 from .widgets import Footbar, Headbar, ChatScreen, TextInput, HouseTree, MemberList
+
 from src import Client
 
 logging.basicConfig(filename="tui.log", encoding="utf-8", level=logging.DEBUG)
 
-
 class Tui(App):
     async def on_load(self, _: events.Load) -> None:
+        user = "test"
         self.queue = Queue()
-        self.client = Client("test", self.queue)
+        self.client = Client(user, self.queue)
         self.client.start_connection()
+        self.current_house = user
+        self.current_room = "general"
+
         self.set_interval(0.2, self.server_listen)
 
         await self.bind("b", "view.toggle('sidebar')", "toggle sidebar")
@@ -26,9 +30,12 @@ class Tui(App):
         await self.bind("ctrl+s", "send_message")
 
     async def action_send_message(self):
-        value = self.input_box.value
+        value = self.input_box.value.strip().strip('\n')
+        if not value:
+            return
+
         self.chat_screen.push_text(value)
-        self.client.send(value)
+        self.client.send(text=value, house=self.current_house, room=self.current_room)
         self.input_box.value = ""
         self.input_box.refresh()
 
@@ -37,8 +44,8 @@ class Tui(App):
 
     async def server_listen(self) -> None:
         if self.queue.qsize():
-            data = self.queue.get()
-            self.chat_screen.push_text(data)
+            message = self.queue.get()
+            self.chat_screen.push_text(message.text)
 
     async def on_mount(self, _: events.Mount) -> None:
         x, y = os.get_terminal_size()
