@@ -4,7 +4,7 @@ from threading import Thread
 from queue import Queue
 from pickle import dumps, loads
 
-from .utils import Message, Data, Channel
+from .utils import Message, Channel
 
 HOST = "localhost"
 PORT = 5500
@@ -15,13 +15,13 @@ class Client:
         self.queue = message_queue
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.online = True
-    #
-    # def send(self, house: str, room: str, text: str):
-    #     message = Message(sender=self.name, house=house, room=room, text=text)
-    #     self.channel.send(message)
 
-    def send(self, message: str):
+    def send(self, house: str, room: str, text: str):
+        message = Message(sender=self.name, house=house, room=room, text=text)
         self.channel.send(message)
+
+    # def send(self, message: str):
+    #     self.channel.send(message)
 
     def listen_from_server(self):
         while 1:
@@ -29,7 +29,7 @@ class Client:
                 data = self.channel.recv()
                 self.queue.put(data)
             except Exception as e:
-                return 0
+                self.queue.put("cannnooott")
 
     def start_connection(self):
         try:

@@ -1,7 +1,8 @@
 from struct import pack, unpack
 from socket import socket
-from pickle import dumps, loads
+from pickle import dump, dumps, loads
 from sys import getsizeof as sizeof
+from .message import Message
 
 
 class Channel:
@@ -14,25 +15,27 @@ class Channel:
     def __init__(self, conn: socket):
         self.conn = conn
 
-    def send(self, data):
+    def send(self, data: Message):
         """
         First sends the size of the data using struct's pack()
         then the data itself
         """
+        self.conn.send(dumps(data))
 
-        data_encoded = dumps(data)
-        bufsize = pack("!i", sizeof(data_encoded))
-        self.conn.sendall(bufsize)
-        self.conn.sendall(data_encoded)
+        # data_encoded = dumps(data)
+        # bufsize = pack("!i", sizeof(data_encoded))
+        # self.conn.send(bufsize)
+        # self.conn.send(data_encoded)
 
-    def recv(self):
+    def recv(self) -> Message:
         """
         A recv_all type method that
         ensures that there is no data loss
         """
 
-        bufsize = unpack("!i", self.conn.recv(37))[
-            0
-        ]  # 37 seems to be the size of a packed `int`
-        data = loads(self.conn.recv(bufsize))
-        return data
+        return loads(self.conn.recv(2048))
+        # bufsize = unpack("!i", self.conn.recv(100))[
+        #     0
+        # ]  # 37 seems to be the size of a packed `int`
+        # data = loads(self.conn.recv(bufsize))
+        # return data
