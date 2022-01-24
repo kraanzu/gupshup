@@ -5,6 +5,10 @@ from rich.panel import Panel
 
 from queue import Queue
 
+import logging
+
+logging.basicConfig(filename="tui.log", encoding="utf-8", level=logging.DEBUG)
+
 
 class ChatScreen(Widget):
     chats = ""
@@ -13,16 +17,9 @@ class ChatScreen(Widget):
         self.queue = queue
         super().__init__(name)
 
-    def on_mount(self, _) -> None:
-        self.set_interval(0.1, self.server_listen)
-
-    def server_listen(self) -> None:
-        while self.queue.qsize():
-            self.push_text(self.queue.get())
-
     def render(self) -> RenderableType:
         return Panel(self.chats)
 
     def push_text(self, msg: str) -> None:
-        self.chats += "\n" + msg
+        self.chats += "\n-x-\n" + msg
         self.refresh()

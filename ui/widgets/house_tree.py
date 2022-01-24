@@ -11,3 +11,7 @@ class HouseTree(CustomTree):
 
     async def add_room(self, house: str, name: str) -> None:
         await self.add_under_child(house, name, "room")
+
+    def del_house(self, name: str):
+        super().del_under_root(name)
+

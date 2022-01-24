@@ -6,8 +6,7 @@ from textual import events
 
 from textual.widgets import TreeClick, ScrollView
 from .widgets import Footbar, Headbar, ChatScreen, TextInput, HouseTree, MemberList
-from tests import client
-
+from src import Client
 
 logging.basicConfig(filename="tui.log", encoding="utf-8", level=logging.DEBUG)
 
@@ -15,13 +14,12 @@ logging.basicConfig(filename="tui.log", encoding="utf-8", level=logging.DEBUG)
 class Tui(App):
     async def on_load(self, _: events.Load) -> None:
         self.queue = Queue()
-        self.client = client(self.queue)
+        self.client = Client("test", self.queue)
         self.client.start_connection()
+        self.set_interval(0.2, self.server_listen)
 
         await self.bind("b", "view.toggle('sidebar')", "toggle sidebar")
         await self.bind("ctrl+q", "quit", "Quit")
-        await self.bind("ctrl-n", "", "next room")
-        await self.bind("ctrl-p", "", "previous room")
         await self.bind(
             "escape", "reset_focus", "resets focus to the header", show=False
         )
@@ -34,6 +32,14 @@ class Tui(App):
         self.input_box.value = ""
         self.input_box.refresh()
 
+    def execute_data(self) -> None:
+        pass
+
+    async def server_listen(self) -> None:
+        if self.queue.qsize():
+            data = self.queue.get()
+            self.chat_screen.push_text(data)
+
     async def on_mount(self, _: events.Mount) -> None:
         x, y = os.get_terminal_size()
         self.headbar = Headbar()
@@ -42,6 +48,7 @@ class Tui(App):
         self.chat_screen = ChatScreen(queue=self.queue)
         self.house_tree = HouseTree("House Tree")
         self.member_list = MemberList("Member List")
+        self.set_interval(0.2, self.server_listen)
 
         await self.view.dock(self.headbar, name="headbar")
         await self.view.dock(

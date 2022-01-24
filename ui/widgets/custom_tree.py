@@ -15,5 +15,14 @@ class CustomTree(TreeControl):
                 await node.add(name, tag)
                 break
 
+    def del_under_root(self, name: str):
+        for child in  self.root.children:
+            if str(child.label) == name:
+                to_del = child
+                break
+
+        del to_del
+        self.refresh()
+
     async def handle_tree_click(self, message: TreeClick) -> None:
         await message.node.toggle()
