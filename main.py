@@ -1,4 +1,10 @@
 from ui import Tui
+import sys
+from src.server import Server
 
-app = Tui()
-app.run()
+if sys.argv[1].lower() == 'server':
+    server = Server()
+    server.start_connection()
+else:
+    app = Tui()
+    app.run()
