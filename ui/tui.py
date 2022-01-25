@@ -8,16 +8,18 @@ from textual.widgets import ScrollView
 from .widgets import Footbar, Headbar, ChatScreen, TextInput, HouseTree, MemberList
 
 from src import Client
+from src.utils import Message
 
 logging.basicConfig(filename="tui.log", encoding="utf-8", level=logging.DEBUG)
 
+
 class Tui(App):
     async def on_load(self, _: events.Load) -> None:
-        user = "test"
+        self.user = "test"
         self.queue = Queue()
-        self.client = Client(user, self.queue)
+        self.client = Client(self.user, self.queue)
         self.client.start_connection()
-        self.current_house = user
+        self.current_house = self.user
         self.current_room = "general"
 
         self.set_interval(0.2, self.server_listen)
@@ -30,22 +32,33 @@ class Tui(App):
         await self.bind("ctrl+s", "send_message")
 
     async def action_send_message(self):
-        value = self.input_box.value.strip().strip('\n')
+        value = self.input_box.value.strip().strip("\n")
         if not value:
             return
 
         self.chat_screen.push_text(value)
-        self.client.send(text=value, house=self.current_house, room=self.current_room)
+        self.client.send(
+            Message(
+                sender=self.user,
+                house=self.current_house,
+                room=self.current_room,
+                text=value,
+            )
+        )
         self.input_box.value = ""
         self.input_box.refresh()
 
-    def execute_data(self) -> None:
-        pass
+    async def execute_message(self, message: Message) -> None:
+        match message.action:
+            case "push_text":
+                self.chat_screen.push_text(message.text)
+            case "add_room":
+                await self.house_tree.add_house(message.text)
 
     async def server_listen(self) -> None:
         if self.queue.qsize():
             message = self.queue.get()
-            self.chat_screen.push_text(message.text)
+            await self.execute_message(message)
 
     async def on_mount(self, _: events.Mount) -> None:
         x, y = os.get_terminal_size()
@@ -54,7 +67,9 @@ class Tui(App):
         self.input_box = TextInput()
         self.chat_screen = ChatScreen(queue=self.queue)
         self.house_tree = HouseTree("House Tree")
+        await self.house_tree.root.expand()
         self.member_list = MemberList("Member List")
+        await self.member_list.root.expand()
         self.set_interval(0.2, self.server_listen)
 
         await self.view.dock(self.headbar, name="headbar")
