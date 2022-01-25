@@ -3,7 +3,7 @@ from textual.widget import Widget
 from rich.console import RenderableType
 from rich.panel import Panel
 
-from queue import Queue
+from collections import defaultdict
 
 import logging
 
@@ -11,15 +11,18 @@ logging.basicConfig(filename="tui.log", encoding="utf-8", level=logging.DEBUG)
 
 
 class ChatScreen(Widget):
-    chats = ""
 
-    def __init__(self, name: str | None = None, queue: Queue = Queue()):
-        self.queue = queue
+    def __init__(self, name: str | None = None):
         super().__init__(name)
+        self.screens = defaultdict(str)
+        self.current_screen = ''
+
+    def set_current_screen(self, name):
+        self.current_screen = name
 
     def render(self) -> RenderableType:
-        return Panel(self.chats)
+        return Panel(self.screens[self.current_screen])
 
-    def push_text(self, msg: str) -> None:
-        self.chats += "\n-x-\n" + msg
+    def push_text(self, screen: str, msg: str) -> None:
+        self.screens[screen] += "\n" + msg
         self.refresh()

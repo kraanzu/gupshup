@@ -3,8 +3,8 @@ from .custom_tree import CustomTree
 
 
 class HouseTree(CustomTree):
-    def __init__(self, name: TextType) -> None:
-        super().__init__(name, "house_root")
+    def __init__(self) -> None:
+        super().__init__("Houses", "house_root")
 
     async def add_house(self, name: str) -> None:
         await super().add_under_root(name, "house")

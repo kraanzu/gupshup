@@ -16,7 +16,7 @@ class CustomTree(TreeControl):
                 break
 
     def del_under_root(self, name: str):
-        for child in  self.root.children:
+        for child in self.root.children:
             if str(child.label) == name:
                 to_del = child
                 break
@@ -24,5 +24,5 @@ class CustomTree(TreeControl):
         del to_del
         self.refresh()
 
-    async def handle_tree_click(self, message: TreeClick) -> None:
-        await message.node.toggle()
+    async def handle_tree_click(self, _: TreeClick) -> None:
+        pass
