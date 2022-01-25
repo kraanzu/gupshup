@@ -1,6 +1,7 @@
 import socket
+from time import sleep
 from threading import Thread
-from typing import Dict
+from typing import Dict, List
 from .utils import Channel, Message, House
 
 HOST = "localhost"
@@ -15,16 +16,21 @@ class Server:
         self.users: Dict[str, Channel] = dict()
         self.houses: Dict[str, House] = dict()
 
-    def broadcast(self, message: Message):
-        for user in message.reciepents:
-            self.users[user].send(message)
+    def broadcast(self, message_list: List[Message]):
+        for message in message_list:
+            print("broadcasting..")
+            print(message)
+            for user in message.reciepents:
+                self.users[user].send(message)
+
+            # TODO: modify `Message` class so that this sleep is not needed
+            sleep(0.1)
 
     def serve_user(self, user: str):
         channel = self.users[user]
         while True:
             try:
                 message = channel.recv()
-                print("recieved", message)
                 data = self.houses[message.house].process_message(message)
                 Thread(target=self.broadcast, args=(data,), daemon=True).start()
 

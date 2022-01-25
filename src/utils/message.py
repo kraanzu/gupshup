@@ -1,4 +1,5 @@
 from typing import List
+from copy import deepcopy
 
 
 class Message:
@@ -8,16 +9,21 @@ class Message:
         house: str,
         room: str,
         text: str,
-        command: str = "",
+        action: str = "",
         reciepents: List[str] = [],
     ):
-        self.command = command
-        self.command = None
+        self.action = action
         self.sender = sender
         self.house = house
         self.room = room
         self.text = text
         self.reciepents = reciepents
 
+    def clone(self) -> "Message":
+        return deepcopy(self)
+
     def __str__(self):
-        return f"\nsender: {self.sender}\nhouse: {self.house}\nroom: {self.room}\ntext: {self.text}"
+        return f"sender: {self.sender}\nhouse: {self.house}\nroom: {self.room}\ntext: {self.text}"
+
+    def __repr__(self):
+        return f"sender: {self.sender}\nhouse: {self.house}\nroom: {self.room}\ntext: {self.text}"

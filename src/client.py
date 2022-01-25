@@ -16,8 +16,7 @@ class Client:
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.online = True
 
-    def send(self, house: str, room: str, text: str):
-        message = Message(sender=self.name, house=house, room=room, text=text)
+    def send(self, message: Message):
         self.channel.send(message)
 
     # def send(self, message: str):
