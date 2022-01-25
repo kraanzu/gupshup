@@ -48,7 +48,7 @@ class House:
 
     def process_message(self, message: Message) -> List[Message]:
         text = message.text
-        if text[0] in "/?":
+        if text[0] in "/":
             return self.process_special_message(message)
 
         message.action = "push_text"

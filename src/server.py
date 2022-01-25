@@ -18,8 +18,8 @@ class Server:
 
     def broadcast(self, message_list: List[Message]):
         for message in message_list:
-            print("broadcasting..")
-            print(message)
+            # print("broadcasting..")
+            # print(message)
             for user in message.reciepents:
                 self.users[user].send(message)
 
@@ -31,6 +31,8 @@ class Server:
         while True:
             try:
                 message = channel.recv()
+                # print("got..")
+                # print(message)
                 data = self.houses[message.house].process_message(message)
                 Thread(target=self.broadcast, args=(data,), daemon=True).start()
 
