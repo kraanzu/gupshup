@@ -26,9 +26,13 @@ class Server:
         # TODO: modify `Channel` class so that this sleep is not needed
         sleep(0.1)
 
+    def action_join(self, message: Message):
+        print("S: action_join OK")
+        house = message.text[6:]
+        return self.houses[house].process_message(message)
+
     def action_add_room(self, message) -> List[Message]:
         param = message.text[10:].strip()
-        print('X', param, message.sender)
 
         if param == message.sender:
             return [
