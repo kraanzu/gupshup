@@ -93,14 +93,17 @@ class House:
             ),
         ]
 
+    def return_not_allowed(self, message) -> List[Message]:
+        return [
+            message.convert(
+                action="warn",
+                text="Your current power level doesn't allow this action",
+            )
+        ]
+
     def action_add_room(self, message: Message) -> List[Message]:
         if not self._is_allowed("add_room", message.sender):
-            return [
-                message.convert(
-                    action="warn",
-                    text="Your current power level doesn't allow this action",
-                )
-            ]
+            return self.return_not_allowed(message)
 
         room = message.text[10:]
         if room in self.rooms:
