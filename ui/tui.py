@@ -21,7 +21,7 @@ class Tui(App):
         self.queue = Queue()
         self.client = Client(self.user, self.queue)
         self.client.start_connection()
-        self.current_house = self.user
+        self.current_house = "HOME"
         self.current_room = "general"
         self.current_screen = f"{self.current_house}/{self.current_room}"
         self.member_lists: dict[str, MemberList] = defaultdict(MemberList)
@@ -55,10 +55,12 @@ class Tui(App):
     async def execute_message(self, message: Message) -> None:
         screen = f"{message.house}/{message.room}"
         match message.action:
-            case "push_text":
-                self.chat_screen.push_text(screen, message.text)
+            case "add_house":
+                await self.house_tree.add_house(message.text)
             case "add_room":
                 await self.house_tree.add_room(message.house, message.text)
+            case _:
+                self.chat_screen.push_text(screen, message.text)
 
     async def server_listen(self) -> None:
         if self.queue.qsize():
@@ -73,8 +75,8 @@ class Tui(App):
         self.chat_screen = ChatScreen()
         self.chat_screen.set_current_screen(self.current_screen)
         self.house_tree = HouseTree()
-        await self.house_tree.add_house(self.user)
-        await self.house_tree.add_room(self.user, "general")
+        await self.house_tree.add_house("HOME")
+        await self.house_tree.add_room("HOME", "general")
         await self.house_tree.root.expand()
         self.member_list = MemberList()
         await self.member_list.root.expand()
