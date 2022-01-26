@@ -9,6 +9,7 @@ from .utils import Message, Channel
 HOST = "localhost"
 PORT = 5500
 
+
 class Client:
     def __init__(self, name: str, message_queue: Queue = Queue()):
         self.name = name
@@ -33,6 +34,7 @@ class Client:
     def start_connection(self):
         try:
             self.conn.connect((HOST, PORT))
+            self.conn.sendall(self.name.encode())
             self.channel = Channel(self.conn)
             Thread(target=self.listen_from_server, daemon=True).start()
         except:
