@@ -75,9 +75,10 @@ class Tui(App):
         self.chat_screen = ChatScreen()
         self.chat_screen.set_current_screen(self.current_screen)
         self.house_tree = HouseTree()
+
         await self.house_tree.add_house("HOME")
-        await self.house_tree.add_room("HOME", "general")
         await self.house_tree.root.expand()
+
         self.member_list = MemberList()
         await self.member_list.root.expand()
 
