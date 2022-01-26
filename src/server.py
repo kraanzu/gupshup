@@ -2,7 +2,7 @@ import socket
 from time import sleep
 from threading import Thread
 from typing import Dict, List
-from .utils import Channel, Message, House
+from .utils import Channel, Message, House, User
 from collections import defaultdict
 
 HOST = "localhost"
@@ -14,7 +14,7 @@ class Server:
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server.bind((HOST, PORT))
-        self.users: Dict[str, Channel] = dict()
+        self.users: Dict[str, User] = dict()
         self.user_bans: Dict[str, list] = defaultdict(list)
         self.houses: Dict[str, House] = dict()
 
@@ -39,7 +39,7 @@ class Server:
                         ),
                     ]
                 else:
-                    if message.sender in self.user_bans[param]:
+                    if self.users[param].has_banned(message.sender):
                         return [
                             message.convert(
                                 action="warn",
@@ -47,11 +47,8 @@ class Server:
                             )
                         ]
                     else:
+                        self.users[message.sender].add_user(param)
                         return [
-                            message.convert(
-                                action="add_room",
-                                text=param,
-                            ),
                             message.convert(
                                 action="success",
                                 text="You can now chat with the user",
@@ -74,27 +71,38 @@ class Server:
                             text="Your new house is ready to rock!",
                         ),
                     ]
+            elif action == "ban":
+                if param not in self.users:
+                    return [
+                        message.convert(
+                            action="warn",
+                            text="No user with such name!",
+                        ),
+                    ]
+                else:
+                    self.users[message.sender].ban_user(param)
+                    return [
+                        message.convert(
+                            action="success",
+                            text=f"User `{param}` can't send you private texts now",
+                        )
+                    ]
             else:
                 return [message.convert(action="warn", text="No such command")]
         else:
             if message.room == "general":
                 return [message.convert()]
             else:
+                self.users[message.room].add_user(message.sender)
                 return [
-                    message.convert(
-                        action="add_room",
-                        text=message.sender,
-                        reciepents=[message.room],
-                    ),
                     message.convert(room=message.sender, reciepents=[message.room]),
                     message.convert(),
                 ]
 
     def serve_user(self, user: str):
-        channel = self.users[user]
         while True:
             try:
-                message = channel.recv()
+                message = self.users[user].recv()
                 if message.house == "HOME":
                     message_list = self.handle_user_message(message)
                     for message in message_list:
@@ -117,7 +125,7 @@ class Server:
             conn, _ = self.server.accept()
             username = conn.recv(1024).decode()
 
-            self.users[username] = Channel(conn)
+            self.users[username] = User(username, conn)
             self.houses[username] = House(username, username)
             print(f"{username} joined")
             Thread(target=self.serve_user, args=(username,), daemon=True).start()

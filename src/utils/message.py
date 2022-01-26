@@ -5,10 +5,10 @@ from copy import deepcopy
 class Message:
     def __init__(
         self,
-        sender: str,
-        house: str,
-        room: str,
-        text: str,
+        sender: str = "",
+        house: str = "",
+        room: str = "",
+        text: str = "",
         action: str = "",
         reciepents: List[str] = [],
     ):
