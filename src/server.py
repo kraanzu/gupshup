@@ -26,73 +26,102 @@ class Server:
         # TODO: modify `Channel` class so that this sleep is not needed
         sleep(0.1)
 
+    def action_add_room(self, message) -> List[Message]:
+        param = message.text[10:].strip()
+        print('X', param, message.sender)
+
+        if param == message.sender:
+            return [
+                message.convert(
+                    action="warn",
+                    text="If you really are that alone that you want to talk with yourself.."
+                    + "\nyou can shoot lame messages in the general section of this house ",
+                )
+            ]
+
+        if param not in self.users:
+            return [
+                message.convert(
+                    action="warn",
+                    text="No user with such name!",
+                ),
+            ]
+        else:
+            if self.users[param].has_banned(message.sender):
+                return [
+                    message.convert(
+                        action="warn",
+                        text="This user has blocked you so you can't connect",
+                    )
+                ]
+            else:
+                self.users[message.sender].add_user(param)
+                return [
+                    message.convert(
+                        action="success",
+                        text="You can now chat with the user",
+                    ),
+                ]
+
+    def action_add_house(self, message):
+        param = message.text[11:]
+        if param in self.houses:
+            return [
+                message.convert(
+                    action="warn",
+                    text="There is already a house with same name",
+                )
+            ]
+        else:
+            self.houses[param] = House(param, message.sender)
+            return [
+                message.convert(action="add_house", text=param),
+                message.convert(
+                    action="success",
+                    text="Your new house is ready to rock!",
+                ),
+            ]
+
+    def action_ban(self, message):
+        param = message.text[5:]
+        if param not in self.users:
+            return [
+                message.convert(
+                    action="warn",
+                    text="No user with such name!",
+                ),
+            ]
+        else:
+            self.users[message.sender].ban_user(param)
+            return [
+                message.convert(
+                    action="success",
+                    text=f"User `{param}` can't send you private texts now",
+                )
+            ]
+
     def handle_user_message(self, message: Message) -> List[Message]:
         text = message.text
-        if text[0] in "?/":
-            action, param = text[1:].split(" ", 1)
-            if action == "addroom":
-                if param not in self.users:
-                    return [
-                        message.convert(
-                            action="warn",
-                            text="No user with such name!",
-                        ),
-                    ]
-                else:
-                    if self.users[param].has_banned(message.sender):
-                        return [
-                            message.convert(
-                                action="warn",
-                                text="This user has blocked you so you can't connect",
-                            )
-                        ]
-                    else:
-                        self.users[message.sender].add_user(param)
-                        return [
-                            message.convert(
-                                action="success",
-                                text="You can now chat with the user",
-                            ),
-                        ]
-
-            elif action == "addhouse":
-                if param in self.houses:
-                    return [
-                        message.convert(
-                            action="warn",
-                            text="There is already a house with same name",
-                        )
-                    ]
-                else:
-                    return [
-                        message.convert(action="add_house", text=param),
-                        message.convert(
-                            action="success",
-                            text="Your new house is ready to rock!",
-                        ),
-                    ]
-            elif action == "ban":
-                if param not in self.users:
-                    return [
-                        message.convert(
-                            action="warn",
-                            text="No user with such name!",
-                        ),
-                    ]
-                else:
-                    self.users[message.sender].ban_user(param)
-                    return [
-                        message.convert(
-                            action="success",
-                            text=f"User `{param}` can't send you private texts now",
-                        )
-                    ]
-            else:
-                return [message.convert(action="warn", text="No such command")]
+        if message.room == "general" and text[0] in "?/":
+            action, _ = text[1:].split(" ", 1)
+            try:
+                cmd = f"self.action_{action}(message)"
+                print(cmd)
+                return eval(cmd)
+            except:
+                return [
+                    message.convert(
+                        action="warn",
+                        text="No such command! See help menu by pressing ctrl-h",
+                    )
+                ]
         else:
             if message.room == "general":
                 return [message.convert()]
             else:
+                if self.users[message.room].has_banned(message.sender):
+                    return [message.convert()]
+
                 self.users[message.room].add_user(message.sender)
                 return [
                     message.convert(room=message.sender, reciepents=[message.room]),

@@ -45,7 +45,7 @@ class Message:
         if text:
             message.text = text
 
-        print(message, message.action)
+        # print(message, message.action)
         return message
 
     def __repr__(self):
