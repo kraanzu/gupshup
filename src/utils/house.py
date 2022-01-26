@@ -20,11 +20,70 @@ class House:
             "king": Rank("king", "red", float("inf")),
             "pawn": Rank("pawn"),
         }
+        self.allowed_commands = [
+            "toggle_type",
+            "allow",
+            "disallow",
+            "kick",
+            "ban_user",
+            "unban_user",
+            "mute",
+            "unmute",
+            "add_room",
+            "del_room",
+            "destroy",
+            "add_rank",
+            "del_rank",
+            "change_rank_color",
+            "change_rank_name",
+            "change_rank_power",
+            "assign_rank",
+            "list_ranks",
+            "rank_info",
+            "add_rank_info",
+            "bye",
+        ]
         self.power_levels: Dict[str, float] = {"king": float("inf")}
         self.required_power: Dict[str, float] = defaultdict(lambda: float("inf"))
 
     def _is_allowed(self, action: str, user: str) -> bool:
         return self.power_levels[self.member_rank[user]] >= self.required_power[action]
+
+    def add_to_waiting_list(self, user: str):
+        self.waiting_users.add(user)
+
+    def add_room(self, name: str) -> None:
+        self.rooms.add(name)
+
+    def del_room(self, name: str) -> None:
+        self.rooms.remove(name)
+
+    def ban_user(self, name: str) -> None:
+        self.banned_users.add(name)
+
+    def unban_user(self, name: str) -> None:
+        self.banned_users.remove(name)
+
+    def add_rank(self, rank: str):
+        self.ranks[rank] = Rank(rank)
+
+    def change_rank_color(self, rank: str, color: str):
+        self.ranks[rank].color = color
+
+    def change_rank_power(self, rank: str, power: float):
+        self.ranks[rank].power = power
+
+    def remove_member(self, member: str):
+        self.members.remove(member)
+
+    def mute_member(self, member: str):
+        self.muted_users.add(member)
+
+    def unmute_member(self, member: str):
+        self.muted_users.remove(member)
+
+    def toggle_type(self):
+        self.type = "open" if self.type == "private" else "private"
 
     def add_member(self, user: str) -> List[Message]:
         self.members.add(user)
@@ -54,8 +113,51 @@ class House:
             ),
         ]
 
-    def action_change_type(self, _: Message) -> List[Message]:
-        self.type = "open" if self.type == "private" else "private"
+    def action_mute(self, message: Message) -> List[Message]:
+
+        user = message.text[6:].strip()
+        if user in self.muted_users:
+            return [message.convert(action="warn", text="The user is already muted")]
+
+        self.mute_member(user)
+        return [
+            message.convert(
+                action="success",
+                text="The user has been muted",
+                reciepents=list(self.members),
+            ),
+        ]
+
+    def action_unmute(self, message: Message) -> List[Message]:
+        user = message.text[8:].strip()
+        if user not in self.muted_users:
+            return [message.convert(action="warn", text="The user is not muted")]
+
+        self.unmute_member(user)
+        return [
+            message.convert(
+                action="success",
+                text=f"user {user} was muted by {message.sender}",
+                reciepents=list(self.members),
+            ),
+        ]
+
+    def action_kick(self, message: Message) -> List[Message]:
+        user = message.text[6:].strip()
+        if user not in self.members:
+            return [message.convert(action="warn", text="user not in the house")]
+
+        self.remove_member(user)
+        return [
+            message.convert(
+                action="info",
+                text=f"User {user} was kicked out of the house",
+                reciepents=list(self.members),
+            )
+        ]
+
+    def action_toggle_type(self, message: Message) -> List[Message]:
+        self.toggle_type()
         for user in self.waiting_users:
             self.add_member(user)
         self.waiting_users = set()
@@ -65,13 +167,10 @@ class House:
                 action="info",
                 house=self.name,
                 room="general",
-                text=f"The group changed its type to {self.type}",
+                text=f"user {message.sender} toggled group's type [{self.type}]",
                 reciepents=list(self.members),
             )
         ]
-
-    def add_to_waiting_list(self, user: str):
-        self.waiting_users.add(user)
 
     def action_join(self, message: Message) -> List[Message]:
         print("JOIN OK")
@@ -93,18 +192,7 @@ class House:
             ),
         ]
 
-    def return_not_allowed(self, message) -> List[Message]:
-        return [
-            message.convert(
-                action="warn",
-                text="Your current power level doesn't allow this action",
-            )
-        ]
-
     def action_add_room(self, message: Message) -> List[Message]:
-        if not self._is_allowed("add_room", message.sender):
-            return self.return_not_allowed(message)
-
         room = message.text[10:]
         if room in self.rooms:
             return [
@@ -133,8 +221,68 @@ class House:
 
         return self.add_member(user)
 
+    def action_ban_user(self, message: Message) -> List[Message]:
+        user = message.text[10:].strip()
+        if user in self.banned_users:
+            return [
+                message.convert(action="warn", text=f"user {user} is already banned")
+            ]
+
+        self.ban_user(user)
+        return [
+            message.convert(
+                sender="SERVER",
+                action="warn",
+                text=f"user {user} was banned by {message.sender}",
+                reciepents=list(self.members),
+            )
+        ]
+
+    def action_unban_user(self, message: Message) -> List[Message]:
+        user = message.text[12:].strip()
+        if user not in self.banned_users:
+            return [
+                message.convert(
+                    action="warn", text=f"user {user} is not in the banned list"
+                )
+            ]
+
+        self.unban_user(user)
+        return [
+            message.convert(
+                sender="SERVER",
+                action="warn",
+                text=f"user {user} was unbanned by {message.sender}",
+                reciepents=list(self.members),
+            )
+        ]
+
+    # TODO: allow
+    # TODO: disallow
+    # TODO: del_room
+    # TODO: destroy
+    # TODO: add_rank
+    # TODO: del_rank
+    # TODO: change_rank_color
+    # TODO: change_rank_name
+    # TODO: change_rank_power
+    # TODO: assign_rank
+    # TODO: list_ranks
+    # TODO: rank_info
+    # TODO: add_rank_info
+    # TODO: bye
+
     def process_special_message(self, message: Message) -> List[Message]:
         action, _ = message.text[1:].split(" ", 1)
+
+        if not self._is_allowed(action, message.sender):
+            return [
+                message.convert(
+                    action="warn",
+                    text="Your current power level doesn't allow this action",
+                )
+            ]
+
         cmd = f"self.action_{action}(message)"
         print("special", cmd)
         return eval(cmd)
@@ -146,12 +294,3 @@ class House:
             return self.process_special_message(message)
 
         return [message.convert(reciepents=list(self.members))]
-
-    def add_room(self, name: str) -> None:
-        self.rooms.add(name)
-
-    def del_room(self, name: str) -> None:
-        self.rooms.remove(name)
-
-    def ban_user(self, name: str) -> None:
-        self.banned_users.add(name)
