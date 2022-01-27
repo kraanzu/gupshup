@@ -21,7 +21,7 @@ class ChatScreen(Widget):
         self.current_screen = name
 
     def render(self) -> RenderableType:
-        return Panel(self.screens[self.current_screen])
+        return self.screens[self.current_screen]
 
     def push_text(self, screen: str, msg: str) -> None:
         self.screens[screen] += "\n" + msg
