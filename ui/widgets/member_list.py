@@ -3,13 +3,13 @@ from rich.console import RenderableType
 
 from textual.widgets import TreeNode
 from .custom_tree import CustomTree
-from src.utils import HouseNode
+from src.utils import CustomNode
 
 
 class MemberList(CustomTree):
     def __init__(self) -> None:
         name = Text("Members", style="bold red")
-        super().__init__(name, HouseNode(type="member_root", icon="M"))
+        super().__init__(name, CustomNode(type="member_root", icon=""))
 
     def render_node(self, node: TreeNode) -> RenderableType:
         return self.render_tree_label(
@@ -35,7 +35,7 @@ class MemberList(CustomTree):
 
         label = Text(node.label) if isinstance(node.label, str) else node.label
         if is_hover:
-            label.stylize("bold red" if node.data.type == 'member_root' else "magenta")
+            label.stylize("bold red" if node.data.type == "member_root" else "magenta")
 
         icon = node.data.icon
         icon_label = Text(f"{icon} ", no_wrap=True, overflow="ellipsis") + label
@@ -44,7 +44,7 @@ class MemberList(CustomTree):
         return icon_label
 
     async def add_rank(self, name: str) -> None:
-        await super().add_under_root(name, HouseNode(type="rank", icon="R"))
+        await super().add_under_root(name, CustomNode(type="rank", icon="R"))
 
     async def add_user_to_rank(self, rank: str, user: str) -> None:
-        await self.add_under_child(rank, user, HouseNode("type=member", icon="m"))
+        await self.add_under_child(rank, user, CustomNode("type=member", icon="m"))

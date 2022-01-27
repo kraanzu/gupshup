@@ -6,8 +6,17 @@ from textual import events
 from sys import argv
 from collections import defaultdict
 
+from textual.reactive import Reactive
 from textual.widgets import ScrollView, TreeClick, Static
-from .widgets import Footbar, Headbar, ChatScreen, TextInput, HouseTree, MemberList
+from .widgets import (
+    Footbar,
+    Headbar,
+    ChatScreen,
+    TextInput,
+    HouseTree,
+    MemberList,
+    Banner,
+)
 from rich.panel import Panel
 
 from src import Client
@@ -38,6 +47,14 @@ class Tui(App):
             "escape", "reset_focus", "resets focus to the header", show=False
         )
         await self.bind("ctrl+s", "send_message")
+
+    async def hide_right_side(self):
+        self.view.named_widgets["rs"].visible = False
+        self.view.named_widgets["member_list"].visible = False
+
+    async def unhide_right_side(self):
+        self.view.named_widgets["rs"].visible = True
+        self.view.named_widgets["member_list"].visible = True
 
     async def action_send_message(self):
         value = self.input_box.value.strip().strip("\n")
@@ -79,16 +96,16 @@ class Tui(App):
         self.footbar = Footbar()
         self.input_box = TextInput(placeholder="Speak your mind here...")
 
-        self.current_screen_bar = Panel(self.current_screen)
+        self.banner = Banner()
         self.chat_screen = ChatScreen()
-        self.chat_scroll = ScrollView(gutter=(0,1))
+        self.chat_scroll = ScrollView(gutter=(0, 1))
         self.chat_screen.set_current_screen(self.current_screen)
 
         self.house_tree = HouseTree()
         await self.house_tree.add_house("HOME")
         await self.house_tree.root.expand()
 
-        self.member_list = MemberList()
+        self.member_list = self.member_lists[self.current_screen]
         await self.member_list.root.expand()
 
         self.rseperator = self.lseperator = "\n" * percent(12, y) + "┃\n" * percent(
@@ -110,29 +127,42 @@ class Tui(App):
 
         # LEFT WIDGETS
         await self.view.dock(
-            self.house_tree, edge="left", size=percent(15, x), name="house_tree"
+            self.house_tree,
+            edge="left",
+            size=percent(15, x),
+            name="house_tree",
         )
         await self.view.dock(Static(self.lseperator), edge="left", size=1, name="ls")
 
         # MIDDLE WIDGETS
         await self.view.dock(
-            Static(self.current_screen_bar),
+            (self.banner),
             size=percent(10, y),
             name="current_screen_bar",
         )
+        await self.hide_right_side()
         await self.view.dock(self.chat_scroll, size=percent(75, y), name="chat_screen")
-        await self.view.dock(
-            self.input_box, size=percent(10, y), name="input_box"
-        )
+        await self.view.dock(self.input_box, size=percent(10, y), name="input_box")
+        self.view.border = "blue"
 
     async def update_chat_screen(self, house: str, room: str):
         self.current_house = house
         self.current_room = room
         self.current_screen = f"{self.current_house}/{self.current_room}"
         self.chat_screen.set_current_screen(self.current_screen)
+        self.banner.set_text(self.current_screen)
 
+        await (
+            self.hide_right_side()
+            if self.current_house == "HOME"
+            else self.unhide_right_side()
+        )
+
+        self.member_list = self.member_lists[self.current_house]
         await self.chat_scroll.update(self.chat_screen.render())
+
         self.chat_scroll.refresh()
+        self.view.refresh()
 
     async def handle_tree_click(self, click: TreeClick):
         node = click.node
@@ -147,10 +177,7 @@ class Tui(App):
                         room,
                     )
             case "house":
-                if self.current_house == str(node.label):
-                    await node.toggle()
-                else:
-                    await self.update_chat_screen(str(node.label), "general")
+                await node.toggle()
 
             # FOR MEMEBER LISTS
             case "rank":

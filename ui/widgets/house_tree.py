@@ -6,13 +6,13 @@ from rich.console import RenderableType
 from textual.widgets import TreeNode, NodeID
 
 from .custom_tree import CustomTree
-from src.utils import HouseNode
+from src.utils import CustomNode
 
 
 class HouseTree(CustomTree):
     def __init__(self) -> None:
         name = Text("House Tree", style="bold red")
-        super().__init__(name, HouseNode(type="house_root", icon=""))
+        super().__init__(name, CustomNode(type="house_root", icon=""))
 
     def render_node(self, node: TreeNode) -> RenderableType:
         return self.render_tree_label(
@@ -47,11 +47,11 @@ class HouseTree(CustomTree):
         return icon_label
 
     async def add_house(self, name: str) -> None:
-        await super().add_under_root(name, HouseNode(type="house", icon="ﳐ"))
+        await super().add_under_root(name, CustomNode(type="house", icon="ﳐ"))
         await self.add_room(name, "general")
 
     async def add_room(self, house: str, name: str) -> None:
-        await self.add_under_child(house, name, HouseNode(type="room", icon="ﴘ"))
+        await self.add_under_child(house, name, CustomNode(type="room", icon="ﴘ"))
 
     def del_house(self, name: str):
         super().del_under_root(name)
