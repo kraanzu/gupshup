@@ -151,6 +151,7 @@ class Tui(App):
         self.current_screen = f"{self.current_house}/{self.current_room}"
         self.chat_screen.set_current_screen(self.current_screen)
         self.banner.set_text(self.current_screen)
+        self.house_tree.select(self.current_house, self.current_room)
 
         await (
             self.hide_right_side()

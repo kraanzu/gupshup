@@ -12,6 +12,7 @@ from src.utils import CustomNode
 class HouseTree(CustomTree):
     def __init__(self) -> None:
         name = Text("House Tree", style="bold red")
+        self.selected = ["", ""]
         super().__init__(name, CustomNode(type="house_root", icon=""))
 
     def render_node(self, node: TreeNode) -> RenderableType:
@@ -35,8 +36,20 @@ class HouseTree(CustomTree):
             "tree_node": node.id,
             "cursor": node.is_cursor,
         }
-
         label = Text(node.label) if isinstance(node.label, str) else node.label
+        if node.data.type == "house_root":
+            color = "bold red"
+        elif node.data.type == "house":
+            color = "green " if str(node.label) == self.selected[0] else "blue "
+        else:
+            color = (
+                "green"
+                if str(node.label) == self.selected[1]
+                and str(node.parent.label) == self.selected[0]
+                else "white"
+            )
+        label.stylize(color)
+
         if is_hover:
             label.stylize("bold red" if node.data.type == "house_root" else "magenta")
 
@@ -45,6 +58,9 @@ class HouseTree(CustomTree):
         icon_label.apply_meta(meta)
 
         return icon_label
+
+    def select(self, house: str, room: str):
+        self.selected = [house, room]
 
     async def add_house(self, name: str) -> None:
         await super().add_under_root(name, CustomNode(type="house", icon="ﳐ"))
