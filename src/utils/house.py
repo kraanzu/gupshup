@@ -257,8 +257,8 @@ class House:
             )
         ]
 
-    # TODO: allow
-    # TODO: disallow
+    # NOTE: allow
+    # NOTE: disallow
     # TODO: del_room
     # TODO: destroy
     # TODO: add_rank
@@ -275,7 +275,9 @@ class House:
     def process_special_message(self, message: Message) -> List[Message]:
         action, _ = message.text[1:].split(" ", 1)
 
-        if not self._is_allowed(action, message.sender):
+        if action not in ["join", "bye"] and not self._is_allowed(
+            action, message.sender
+        ):
             return [
                 message.convert(
                     action="warn",

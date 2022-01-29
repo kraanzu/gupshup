@@ -18,10 +18,9 @@ from .widgets import (
     MemberList,
     Banner,
 )
-from rich.panel import Panel
 
 from src import Client
-from src.utils import Message, CustomNode
+from src.utils import Message
 
 logging.basicConfig(filename="tui.log", encoding="utf-8", level=logging.DEBUG)
 
@@ -49,27 +48,24 @@ class Tui(App):
         )
         await self.bind("ctrl+s", "send_message")
 
-    async def hide_right_side(self):
-        self.view.named_widgets["rs"].visible = False
-        self.view.named_widgets["member_list"].visible = False
-
-    async def unhide_right_side(self):
-        self.view.named_widgets["rs"].visible = True
-        self.view.named_widgets["member_list"].visible = True
-
     async def action_send_message(self):
-        value = self.input_box.value.strip().strip("\n")
-        if not value:
-            return
 
-        self.client.send(
-            Message(
-                sender=self.user,
-                house=self.current_house,
-                room=self.current_room,
-                text=value,
+        value = self.input_box.value.strip().strip("\n")
+        if value[0] != '-':
+            if not value:
+                return
+
+            self.client.send(
+                Message(
+                    sender=self.user,
+                    house=self.current_house,
+                    room=self.current_room,
+                    text=value,
+                )
             )
-        )
+        else:
+            value = value[1:]
+            self.house_tree.del_house(value)
 
         self.input_box.value = ""
         self.input_box.refresh()
@@ -93,7 +89,7 @@ class Tui(App):
             await self.execute_message(message)
 
     async def on_mount(self, _: events.Mount) -> None:
-        x, y = os.get_terminal_size()
+        y = os.get_terminal_size()[1]
         self.headbar = Headbar()
         self.footbar = Footbar()
         self.input_box = TextInput(placeholder="Speak your mind here...")
@@ -167,7 +163,6 @@ class Tui(App):
     async def handle_tree_click(self, click: TreeClick):
         node = click.node
         match node.data.type:
-            # FOR HOUSE TREE
             case "room":
                 if node.parent:
                     house = str(node.parent.label)

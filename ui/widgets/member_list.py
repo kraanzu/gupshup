@@ -48,3 +48,9 @@ class MemberList(CustomTree):
 
     async def add_user_to_rank(self, rank: str, user: str) -> None:
         await self.add_under_child(rank, user, CustomNode("type=member", icon="m"))
+
+    async def del_from_rank(self, rank: str, member: str):
+        super().del_under_child(rank, member)
+
+    async def del_rank(self, rank: str):
+        super().del_under_root(rank)

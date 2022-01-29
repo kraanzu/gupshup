@@ -5,6 +5,7 @@ class CustomNode:
         self.pending = 0
         self.silent = False
         self.color = color
+        self.hidden = False
 
     def change_icon(self, new_icon: str) -> None:
         self.icon = new_icon

@@ -71,3 +71,6 @@ class HouseTree(CustomTree):
 
     def del_house(self, name: str):
         super().del_under_root(name)
+
+    def del_room(self, house: str, room: str):
+        super().del_under_child(house, room)

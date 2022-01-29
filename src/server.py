@@ -27,7 +27,6 @@ class Server:
         sleep(0.1)
 
     def action_join(self, message: Message):
-        print("S: action_join OK")
         house = message.text[6:]
         return self.houses[house].process_message(message)
 
@@ -86,7 +85,7 @@ class Server:
                 ),
             ]
 
-    def action_ban(self, message):
+    def action_block(self, message):
         param = message.text[5:]
         if param not in self.users:
             return [
@@ -107,16 +106,25 @@ class Server:
     def handle_user_message(self, message: Message) -> List[Message]:
         text = message.text
         if message.room == "general" and text[0] in "?/":
-            action, _ = text[1:].split(" ", 1)
             try:
+                action, _ = text[1:].split(" ", 1)
                 cmd = f"self.action_{action}(message)"
                 print(cmd)
                 return eval(cmd)
-            except:
+
+            except AttributeError:
                 return [
                     message.convert(
                         action="warn",
                         text="No such command! See help menu by pressing ctrl-h",
+                    )
+                ]
+
+            except ValueError:
+                return [
+                    message.convert(
+                        action="warn",
+                        text="invalid usage of parameters! Press ctrl+h for help menu",
                     )
                 ]
         else:
