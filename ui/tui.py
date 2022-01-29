@@ -2,7 +2,7 @@ import logging
 import os
 from queue import Queue
 from textual.app import App
-from textual import events
+from textual import events, message, message_pump
 from sys import argv
 from collections import defaultdict
 from textual.layouts.dock import DockLayout
@@ -51,7 +51,7 @@ class Tui(App):
     async def action_send_message(self):
 
         value = self.input_box.value.strip().strip("\n")
-        if value[0] != '-':
+        if value[0] != "-":
             if not value:
                 return
 
@@ -70,18 +70,36 @@ class Tui(App):
         self.input_box.value = ""
         self.input_box.refresh()
 
-    async def execute_message(self, message: Message) -> None:
+    async def perform_push_text(self, message: Message):
         screen = f"{message.house}/{message.room}"
-        match message.action:
-            case "add_house":
-                await self.house_tree.add_house(message.text)
-            case "add_room":
-                await self.house_tree.add_room(message.house, message.text)
-            case _:
-                self.chat_screen[screen].push_text(message.text)
-
+        self.chat_screen[screen].push_text(message.text)
         if self.current_screen == screen:
             await self.refresh_screen()
+
+    async def perform_add_house(self, message: Message):
+        await self.house_tree.add_house(message.text)
+
+    async def perform_add_room(self, message: Message):
+        await self.refresh_screen()
+        await self.house_tree.add_room(message.house, message.text)
+
+    async def perform_del_room(self, message: Message):
+        self.house_tree.del_room(message.house, message.room)
+
+    async def perform_del_house(self, message: Message):
+        self.house_tree.del_house(message.house)
+
+    async def perform_add_rank(self, message: Message):
+        await self.member_lists[message.house].add_rank(message.text)
+
+    async def perform_add_user_rank(self, message: Message):
+        await self.member_lists[message.house].add_user_to_rank(
+            message.data["rank"], message.data["user"]
+        )
+
+    async def execute_message(self, message: Message) -> None:
+        await eval(f"self.perform_{message.action}(message)")
+        await self.refresh_screen()
 
     async def server_listen(self) -> None:
         if self.queue.qsize():
@@ -109,6 +127,9 @@ class Tui(App):
         await self.refresh_screen()
 
     async def refresh_screen(self):
+        # clears all the widgets from the screen..and re render them all
+        # Why? you ask? this was the only way at the time of this writing
+
         if isinstance(self.view.layout, DockLayout):
             self.view.layout.docks.clear()
         self.view.widgets.clear()

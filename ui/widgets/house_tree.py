@@ -45,6 +45,7 @@ class HouseTree(CustomTree):
             color = (
                 "green"
                 if str(node.label) == self.selected[1]
+                # SAFETY: The only else option is `room` and a room will always have a parent
                 and str(node.parent.label) == self.selected[0]
                 else "white"
             )
@@ -65,12 +66,16 @@ class HouseTree(CustomTree):
     async def add_house(self, name: str) -> None:
         await super().add_under_root(name, CustomNode(type="house", icon="ﳐ"))
         await self.add_room(name, "general")
+        self.refresh()
 
     async def add_room(self, house: str, name: str) -> None:
         await self.add_under_child(house, name, CustomNode(type="room", icon="ﴘ"))
+        self.refresh()
 
     def del_house(self, name: str):
         super().del_under_root(name)
+        self.refresh()
 
     def del_room(self, house: str, room: str):
         super().del_under_child(house, room)
+        self.refresh()

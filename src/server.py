@@ -2,8 +2,7 @@ import socket
 from time import sleep
 from threading import Thread
 from typing import Dict, List
-from .utils import Channel, Message, House, User
-from collections import defaultdict
+from .utils import Message, House, User
 
 HOST = "localhost"
 PORT = 5500
@@ -14,15 +13,13 @@ class Server:
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server.bind((HOST, PORT))
+
         self.users: Dict[str, User] = dict()
-        self.user_bans: Dict[str, list] = defaultdict(list)
         self.houses: Dict[str, House] = dict()
 
     def broadcast(self, message: Message, reciepents: List[str]):
-
         for user in reciepents:
             self.users[user].send(message)
-
         # TODO: modify `Channel` class so that this sleep is not needed
         sleep(0.1)
 
@@ -36,7 +33,6 @@ class Server:
         if param == message.sender:
             return [
                 message.convert(
-                    action="warn",
                     text="If you really are that alone that you want to talk with yourself.."
                     + "\nyou can shoot lame messages in the general section of this house ",
                 )
@@ -45,7 +41,6 @@ class Server:
         if param not in self.users:
             return [
                 message.convert(
-                    action="warn",
                     text="No user with such name!",
                 ),
             ]
@@ -53,15 +48,13 @@ class Server:
             if self.users[param].has_banned(message.sender):
                 return [
                     message.convert(
-                        action="warn",
                         text="This user has blocked you so you can't connect",
                     )
                 ]
             else:
-                self.users[message.sender].add_user(param)
+                self.users[message.sender].add_chat(param)
                 return [
                     message.convert(
-                        action="success",
                         text="You can now chat with the user",
                     ),
                 ]
@@ -71,7 +64,6 @@ class Server:
         if param in self.houses:
             return [
                 message.convert(
-                    action="warn",
                     text="There is already a house with same name",
                 )
             ]
@@ -80,17 +72,15 @@ class Server:
             return [
                 message.convert(action="add_house", text=param),
                 message.convert(
-                    action="success",
                     text="Your new house is ready to rock!",
                 ),
             ]
 
-    def action_block(self, message):
+    def action_ban(self, message):
         param = message.text[5:]
         if param not in self.users:
             return [
                 message.convert(
-                    action="warn",
                     text="No user with such name!",
                 ),
             ]
@@ -98,10 +88,37 @@ class Server:
             self.users[message.sender].ban_user(param)
             return [
                 message.convert(
-                    action="success",
                     text=f"User `{param}` can't send you private texts now",
                 )
             ]
+
+    def action_silent(self, message: Message) -> List[Message]:
+        param = message.text[8:]
+        if param not in self.users:
+            return [
+                message.convert(
+                    text="No user with such name!",
+                ),
+            ]
+        else:
+            self.users[message.sender].silent_user(param)
+            return [
+                message.convert(
+                    text=f"messages from `{param}` won't have a notification now",
+                )
+            ]
+
+    def action_del_chat(self, message: Message) -> List[Message]:
+        param = message.text[8:]
+        if param not in self.users[message.sender].home.rooms:
+            return [
+                message.convert(
+                    text="This user is not in your private chats",
+                ),
+            ]
+        else:
+            self.users[message.sender].del_chat(param)
+            return []
 
     def handle_user_message(self, message: Message) -> List[Message]:
         text = message.text
@@ -115,16 +132,14 @@ class Server:
             except AttributeError:
                 return [
                     message.convert(
-                        action="warn",
-                        text="No such command! See help menu by pressing ctrl-h",
+                        text="[red]No such command! See help menu by pressing ctrl-h[/red]",
                     )
                 ]
 
             except ValueError:
                 return [
                     message.convert(
-                        action="warn",
-                        text="invalid usage of parameters! Press ctrl+h for help menu",
+                        text="[red]invalid usage of parameters! Press ctrl+h for help menu[/red]",
                     )
                 ]
         else:
@@ -134,7 +149,7 @@ class Server:
                 if self.users[message.room].has_banned(message.sender):
                     return [message.convert()]
 
-                self.users[message.room].add_user(message.sender)
+                self.users[message.room].add_chat(message.sender)
                 return [
                     message.convert(room=message.sender, reciepents=[message.room]),
                     message.convert(),

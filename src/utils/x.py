@@ -89,6 +89,14 @@ class House:
         self.members.add(user)
         self.member_rank[user] = "pawn"
 
+        message = Message(
+            sender="SERVER",
+            house="HOME",
+            room="general",
+            text=f"Yay now you are a part of the house `{self.name}` !",
+            reciepents=[user],
+        )
+
         return [
             Message(
                 action="push_text",
@@ -98,13 +106,13 @@ class House:
                 reciepents=list(self.members),
             ),
             Message(
-                action='push_text',
                 sender="SERVER",
                 house="HOME",
                 room="general",
                 text=f"Yay now you are a part of the house `{self.name}` !",
                 reciepents=[user],
             ),
+            message.convert(),
             Message(action="add_house", text=self.name, reciepents=[user]),
             *[
                 Message(

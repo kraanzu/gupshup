@@ -11,6 +11,7 @@ class Message:
         text: str = "",
         action: str = "",
         reciepents: List[str] = [],
+        data: dict[str, str] = {},
     ):
         self.action = action
         self.sender = sender
@@ -18,6 +19,7 @@ class Message:
         self.room = room
         self.text = text
         self.reciepents = reciepents
+        self.data = data
 
     def clone(self) -> "Message":
         return deepcopy(self)
@@ -30,11 +32,12 @@ class Message:
     def convert(
         self,
         sender: str = "",
-        action: str = "normal",
+        action: str = "push_text",
         text: str = "",
         house: str = "",
         room: str = "",
         reciepents: list[str] = [],
+        data: dict[str, str] = {},
     ) -> "Message":
         message = self.clone()
         message.reciepents = reciepents if reciepents else [message.sender]
@@ -45,6 +48,10 @@ class Message:
             message.house = house
         if text:
             message.text = text
+        if sender:
+            message.sender = sender
+
+        message.data = data
 
         # print(message, message.action)
         return message
