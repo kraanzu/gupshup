@@ -5,6 +5,7 @@ from textual.app import App
 from textual import events
 from sys import argv
 from collections import defaultdict
+from textual.layouts.dock import DockLayout
 
 from textual.reactive import Reactive
 from textual.widgets import ScrollView, TreeClick, Static
@@ -20,7 +21,7 @@ from .widgets import (
 from rich.panel import Panel
 
 from src import Client
-from src.utils import Message
+from src.utils import Message, CustomNode
 
 logging.basicConfig(filename="tui.log", encoding="utf-8", level=logging.DEBUG)
 
@@ -81,9 +82,10 @@ class Tui(App):
             case "add_room":
                 await self.house_tree.add_room(message.house, message.text)
             case _:
-                self.chat_screen.push_text(screen, message.text)
+                self.chat_screen[screen].push_text(message.text)
 
-        await self.chat_scroll.update(self.chat_screen.render())
+        if self.current_screen == screen:
+            await self.refresh_screen()
 
     async def server_listen(self) -> None:
         if self.queue.qsize():
@@ -97,33 +99,38 @@ class Tui(App):
         self.input_box = TextInput(placeholder="Speak your mind here...")
 
         self.banner = Banner()
-        self.chat_screen = ChatScreen()
-        self.chat_scroll = ScrollView(gutter=(0, 1))
-        self.chat_screen.set_current_screen(self.current_screen)
+        self.chat_screen = defaultdict(ChatScreen)
 
         self.house_tree = HouseTree()
         await self.house_tree.add_house("HOME")
         await self.house_tree.root.expand()
-
-        self.member_list = self.member_lists[self.current_screen]
-        await self.member_list.root.expand()
 
         self.rseperator = self.lseperator = "\n" * percent(12, y) + "┃\n" * percent(
             75, y
         )
 
         self.set_interval(0.2, self.server_listen)
+        await self.refresh_screen()
 
+    async def refresh_screen(self):
+        if isinstance(self.view.layout, DockLayout):
+            self.view.layout.docks.clear()
+        self.view.widgets.clear()
+
+        x, y = os.get_terminal_size()
         await self.view.dock(self.headbar, name="headbar")
 
         # RIGHT WIDGETS
-        await self.view.dock(
-            ScrollView(self.member_list),
-            edge="right",
-            size=int(0.15 * x),
-            name="member_list",
-        )
-        await self.view.dock(Static(self.rseperator), edge="right", size=1, name="rs")
+        if self.current_house != "HOME":
+            await self.view.dock(
+                ScrollView(self.member_lists[self.current_house]),
+                edge="right",
+                size=int(0.15 * x),
+                name="member_list",
+            )
+            await self.view.dock(
+                Static(self.rseperator), edge="right", size=1, name="rs"
+            )
 
         # LEFT WIDGETS
         await self.view.dock(
@@ -136,34 +143,26 @@ class Tui(App):
 
         # MIDDLE WIDGETS
         await self.view.dock(
-            (self.banner),
+            self.banner,
             size=percent(10, y),
             name="current_screen_bar",
         )
-        await self.hide_right_side()
-        await self.view.dock(self.chat_scroll, size=percent(75, y), name="chat_screen")
+        await self.view.dock(
+            self.chat_screen[self.current_screen],
+            size=percent(75, y),
+            name="chat_screen",
+        )
         await self.view.dock(self.input_box, size=percent(10, y), name="input_box")
-        self.view.border = "blue"
 
     async def update_chat_screen(self, house: str, room: str):
         self.current_house = house
         self.current_room = room
         self.current_screen = f"{self.current_house}/{self.current_room}"
-        self.chat_screen.set_current_screen(self.current_screen)
+
         self.banner.set_text(self.current_screen)
         self.house_tree.select(self.current_house, self.current_room)
 
-        await (
-            self.hide_right_side()
-            if self.current_house == "HOME"
-            else self.unhide_right_side()
-        )
-
-        self.member_list = self.member_lists[self.current_house]
-        await self.chat_scroll.update(self.chat_screen.render())
-
-        self.chat_scroll.refresh()
-        self.view.refresh()
+        await self.refresh_screen()
 
     async def handle_tree_click(self, click: TreeClick):
         node = click.node

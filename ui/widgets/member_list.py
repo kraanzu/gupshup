@@ -35,7 +35,7 @@ class MemberList(CustomTree):
 
         label = Text(node.label) if isinstance(node.label, str) else node.label
         if is_hover:
-            label.stylize("bold red" if node.data.type == "member_root" else "magenta")
+            label.stylize("bold blue" if node.data.type == "member_root" else "magenta")
 
         icon = node.data.icon
         icon_label = Text(f"{icon} ", no_wrap=True, overflow="ellipsis") + label

@@ -11,18 +11,16 @@ logging.basicConfig(filename="tui.log", encoding="utf-8", level=logging.DEBUG)
 
 
 class ChatScreen(Widget):
-
     def __init__(self, name: str | None = None):
         super().__init__(name)
-        self.screens = defaultdict(str)
-        self.current_screen = ''
+        self.chats = ""
 
     def set_current_screen(self, name):
         self.current_screen = name
 
     def render(self) -> RenderableType:
-        return self.screens[self.current_screen]
+        return self.chats
 
-    def push_text(self, screen: str, msg: str) -> None:
-        self.screens[screen] += "\n" + msg
+    def push_text(self, msg: str) -> None:
+        self.chats += "\n" + msg
         self.refresh()
