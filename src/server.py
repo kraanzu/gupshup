@@ -69,8 +69,12 @@ class Server:
             ]
         else:
             self.houses[param] = House(param, message.sender)
+            self.users[message.sender].add_house(param)
+            sleep(0.1)
+            self.users[message.sender].add_rank(param, "king")
+            sleep(0.1)
+            self.users[message.sender].add_user_rank(param, "king", message.sender)
             return [
-                message.convert(action="add_house", text=param),
                 message.convert(
                     text="Your new house is ready to rock!",
                 ),

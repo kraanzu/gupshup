@@ -12,6 +12,7 @@ class CustomTree(TreeControl):
 
     def __init__(self, name: TextType, data: CustomNode):
         super().__init__(name, data)
+        self.root._expanded = True
 
     def on_focus(self) -> None:
         self.has_focus = True
@@ -24,7 +25,7 @@ class CustomTree(TreeControl):
             node.tree.guide_style = (
                 "bold not dim red" if node.id == hover_node else "black"
             )
-        self.refresh(layout=True)
+        self.refresh()
 
     def get_node_index(self, parent: TreeNode, name: str) -> int:
         for index, node in enumerate(parent.children):

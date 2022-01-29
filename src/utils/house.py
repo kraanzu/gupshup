@@ -20,29 +20,6 @@ class House:
             "king": Rank("king", "red", float("inf")),
             "pawn": Rank("pawn"),
         }
-        self.allowed_commands = [
-            "toggle_type",
-            "allow",
-            "disallow",
-            "kick",
-            "ban_user",
-            "unban_user",
-            "mute",
-            "unmute",
-            "add_room",
-            "del_room",
-            "destroy",
-            "add_rank",
-            "del_rank",
-            "change_rank_color",
-            "change_rank_name",
-            "change_rank_power",
-            "assign_rank",
-            "list_ranks",
-            "rank_info",
-            "add_rank_info",
-            "bye",
-        ]
         self.power_levels: Dict[str, float] = {"king": float("inf")}
         self.required_power: Dict[str, float] = defaultdict(lambda: float("inf"))
 
@@ -98,7 +75,7 @@ class House:
                 reciepents=list(self.members),
             ),
             Message(
-                action='push_text',
+                action="push_text",
                 sender="SERVER",
                 house="HOME",
                 room="general",
@@ -113,13 +90,35 @@ class House:
                 for room in self.rooms
                 if room != "general"
             ],
+            *[
+                Message(
+                    action="add_rank", house=self.name, text=rank, reciepents=[user]
+                )
+                for rank in self.ranks.keys()
+            ],
+            Message(
+                action="add_user_rank",
+                house=self.name,
+                data={"rank": "pawn", "user": user},
+                reciepents=list(self.members),
+            ),
+            *[
+                Message(
+                    action="add_user_rank",
+                    house=self.name,
+                    data={"rank": rank, "user": member},
+                    reciepents=[user],
+                )
+                for member, rank in self.member_rank.items()
+                if member != user
+            ],
         ]
 
     def action_mute(self, message: Message) -> List[Message]:
 
         user = message.text[6:].strip()
         if user in self.muted_users:
-            return [message.convert(action="warn", text="The user is already muted")]
+            return [message.convert(text="The user is already muted")]
 
         self.mute_member(user)
         return [

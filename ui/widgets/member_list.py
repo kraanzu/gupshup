@@ -5,7 +5,6 @@ from textual.widgets import TreeNode
 from .custom_tree import CustomTree
 from src.utils import CustomNode
 
-
 class MemberList(CustomTree):
     def __init__(self) -> None:
         name = Text("Members", style="bold red")

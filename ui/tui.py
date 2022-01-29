@@ -47,6 +47,13 @@ class Tui(App):
             "escape", "reset_focus", "resets focus to the header", show=False
         )
         await self.bind("ctrl+s", "send_message")
+        await self.bind("ctrl+r", "go")
+
+    async def action_go(self):
+        await self.refresh_screen()
+        # self.view.named_widgets["member_list"].visible = not self.view.named_widgets[
+        #     "member_list"
+        # ].visible
 
     async def action_send_message(self):
 
@@ -64,8 +71,7 @@ class Tui(App):
                 )
             )
         else:
-            value = value[1:]
-            self.house_tree.del_house(value)
+            pass
 
         self.input_box.value = ""
         self.input_box.refresh()
@@ -123,7 +129,7 @@ class Tui(App):
             75, y
         )
 
-        self.set_interval(0.2, self.server_listen)
+        self.set_interval(0.8, self.server_listen)
         await self.refresh_screen()
 
     async def refresh_screen(self):
@@ -138,16 +144,16 @@ class Tui(App):
         await self.view.dock(self.headbar, name="headbar")
 
         # RIGHT WIDGETS
-        if self.current_house != "HOME":
-            await self.view.dock(
-                ScrollView(self.member_lists[self.current_house]),
-                edge="right",
-                size=int(0.15 * x),
-                name="member_list",
-            )
-            await self.view.dock(
-                Static(self.rseperator), edge="right", size=1, name="rs"
-            )
+        # if self.current_house != "HOME":
+        await self.view.dock(
+            ScrollView(self.member_lists[self.current_house]),
+            edge="right",
+            size=int(0.15 * x),
+            name="member_list",
+        )
+        await self.view.dock(
+            Static(self.rseperator), edge="right", size=1, name="rs"
+        )
 
         # LEFT WIDGETS
         await self.view.dock(
@@ -170,6 +176,7 @@ class Tui(App):
             name="chat_screen",
         )
         await self.view.dock(self.input_box, size=percent(10, y), name="input_box")
+        await self.member_lists[self.current_house].root.expand()
 
     async def update_chat_screen(self, house: str, room: str):
         self.current_house = house
