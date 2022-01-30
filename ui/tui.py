@@ -86,7 +86,6 @@ class Tui(App):
         await self.house_tree.add_house(message.text)
 
     async def perform_add_room(self, message: Message):
-        await self.refresh_screen()
         await self.house_tree.add_room(message.house, message.text)
 
     async def perform_del_room(self, message: Message):
@@ -94,18 +93,30 @@ class Tui(App):
 
     async def perform_del_house(self, message: Message):
         self.house_tree.del_house(message.house)
+        await self.update_chat_screen("HOME", "general")
 
     async def perform_add_rank(self, message: Message):
         await self.member_lists[message.house].add_rank(message.text)
+
+    async def perform_del_rank(self, message: Message):
+        await self.member_lists[message.house].del_rank(message.text)
 
     async def perform_add_user_rank(self, message: Message):
         await self.member_lists[message.house].add_user_to_rank(
             message.data["rank"], message.data["user"]
         )
 
+    async def perform_del_user_rank(self, message: Message):
+        await self.member_lists[message.house].del_from_rank(
+            message.data["rank"], message.data["user"]
+        )
+
     async def execute_message(self, message: Message) -> None:
-        await eval(f"self.perform_{message.action}(message)")
-        await self.refresh_screen()
+        cmd = f"self.perform_{message.action}(message)"
+        self.chat_screen[self.current_screen].push_text(cmd)
+        await eval(cmd)
+        # self.member_lists[self.current_house].refresh()
+        # self.chat_screen[self.current_screen].refresh()
 
     async def server_listen(self) -> None:
         if self.queue.qsize():
@@ -144,16 +155,16 @@ class Tui(App):
         await self.view.dock(self.headbar, name="headbar")
 
         # RIGHT WIDGETS
-        # if self.current_house != "HOME":
-        await self.view.dock(
-            ScrollView(self.member_lists[self.current_house]),
-            edge="right",
-            size=int(0.15 * x),
-            name="member_list",
-        )
-        await self.view.dock(
-            Static(self.rseperator), edge="right", size=1, name="rs"
-        )
+        if self.current_house != "HOME":
+            await self.view.dock(
+                ScrollView(self.member_lists[self.current_house]),
+                edge="right",
+                size=int(0.15 * x),
+                name="member_list",
+            )
+            await self.view.dock(
+                Static(self.rseperator), edge="right", size=1, name="rs"
+            )
 
         # LEFT WIDGETS
         await self.view.dock(

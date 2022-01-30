@@ -5,6 +5,7 @@ from textual.widgets import TreeNode
 from .custom_tree import CustomTree
 from src.utils import CustomNode
 
+
 class MemberList(CustomTree):
     def __init__(self) -> None:
         name = Text("Members", style="bold red")
@@ -44,12 +45,20 @@ class MemberList(CustomTree):
 
     async def add_rank(self, name: str) -> None:
         await super().add_under_root(name, CustomNode(type="rank", icon="R"))
+        self.refresh()
 
     async def add_user_to_rank(self, rank: str, user: str) -> None:
         await self.add_under_child(rank, user, CustomNode("type=member", icon="m"))
+        self.refresh()
 
     async def del_from_rank(self, rank: str, member: str):
         super().del_under_child(rank, member)
+        self.refresh()
 
     async def del_rank(self, rank: str):
         super().del_under_root(rank)
+        self.refresh()
+
+    async def change_rank_data(self, rank: str, param: str, value: str):
+        super().change_data_parent(rank, param, value)
+        self.refresh()

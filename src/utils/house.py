@@ -10,7 +10,7 @@ class House:
         self.name = name
         self.king = king
         self.rooms = {"general"}
-        self.members = {king}
+        self.members = set([king])
         self.banned_users = set()
         self.muted_users = set()
         self.bot_binds = set()
@@ -65,7 +65,6 @@ class House:
     def add_member(self, user: str) -> List[Message]:
         self.members.add(user)
         self.member_rank[user] = "pawn"
-
         return [
             Message(
                 action="push_text",
@@ -115,7 +114,6 @@ class House:
         ]
 
     def action_mute(self, message: Message) -> List[Message]:
-
         user = message.text[6:].strip()
         if user in self.muted_users:
             return [message.convert(text="The user is already muted")]
@@ -144,26 +142,35 @@ class House:
         ]
 
     def action_kick(self, message: Message) -> List[Message]:
-        user = message.text[6:].strip()
-        if user not in self.members:
-            return [message.convert(action="warn", text="user not in the house")]
-
-        self.remove_member(user)
-        return [
+        member = message.text[6:].strip()
+        if member not in self.members:
+            return [message.convert(text="user not in the house")]
+        self.remove_member(member)
+        x = [
             message.convert(
-                text=f"User {user} was kicked out of the house",
+                text=f"User {member} was kicked out of the house",
                 reciepents=list(self.members),
-            )
+            ),
+            message.convert(action="del_house", reciepents=[member]),
+            message.convert(
+                action="del_user_rank",
+                reciepents=list(self.members),
+                data={"rank": self.member_rank[member], "user": member},
+            ),
         ]
+        del self.member_rank[member]
+        return x
 
     def action_toggle_type(self, message: Message) -> List[Message]:
         self.toggle_type()
+        x = []
         for user in self.waiting_users:
-            self.add_member(user)
+            x.extend(self.add_member(user))
         self.waiting_users = set()
 
-        return [
+        return x + [
             Message(
+                action="push_text",
                 house=self.name,
                 room="general",
                 text=f"user {message.sender} toggled group's type [{self.type}]",
@@ -172,7 +179,10 @@ class House:
         ]
 
     def action_join(self, message: Message) -> List[Message]:
-        print("JOIN OK")
+        # print("JOIN OK")
+        if message.sender in self.banned_users:
+            return [message.convert(text="you have been banned from this group")]
+
         if self.type == "open":
             return self.add_member(message.sender)
 
@@ -246,32 +256,96 @@ class House:
             )
         ]
 
-    # NOTE: allow
-    # NOTE: disallow
-    # TODO: del_room
-    # NOTE: allow
-    # NOTE: disallow
-    # TODO: del_room
-    # TODO: destroy
-    # TODO: add_rank
-    # TODO: del_rank
-    # TODO: change_rank_color
-    # TODO: change_rank_name
-    # TODO: change_rank_power
-    # TODO: assign_rank
-    # TODO: list_ranks
-    # TODO: rank_info
-    # TODO: add_rank_info
-    # TODO: bye
+    def action_del_room(self, message: Message) -> List[Message]:
+        room = message.text[10:].strip()
+        if room == "general":
+            return [message.convert(text="you can't delete the general chat")]
+        elif room not in self.rooms:
+            return [message.convert(text=f"there is no room with the name {room}")]
+        return [
+            message.convert(action="del_room", room=room, reciepents=list(self.members))
+        ]
 
-    def process_message(self, message: Message):
+    def action_destroy(self, message: Message):
+        return [message.convert(action="del_house", reciepents=list(self.members))]
+
+    def action_add_rank(self, message: Message):
+        rank = message.text[10:].strip()
+        if rank in self.ranks:
+            return [message.convert(text="there is already a rank with same name")]
+
+        self.ranks[rank] = Rank(rank)
+        return [
+            message.convert(
+                action="add_rank", text=rank, reciepents=list(self.members)
+            ),
+        ]
+
+    def action_del_rank(self, message: Message):
+        rank = message.text[10:].strip()
+        if rank not in self.ranks:
+            return [message.convert(text="there is no such rank in this house")]
+        if rank in ["king", "pawn"]:
+            return [message.convert(text="You can't delete this rank")]
+        return [
+            message.convert(
+                action="del_rank", text=rank, reciepents=list(self.members)
+            ),
+        ]
+
+    # TODO: change_rank_name
+    # TODO: assign_rank
+
+    def action_list_ranks(self, message: Message) -> List[Message]:
+        return [message.convert(text=f"The ranks are: {', '.join(self.ranks)}")]
+
+    def action_rank_info(self, message: Message) -> List[Message]:
+        rank = message.text[11:].strip()
+        if rank not in self.ranks:
+            return [message.convert(text="No such rank in the house")]
+
+        return [message.convert(text=self.ranks[rank].info)]
+
+    def action_add_rank_info(self, message: Message) -> List[Message]:
+        param = message.text[15:].strip()
+        rank, info = param.split(" ", 1)
+        if rank not in self.ranks:
+            return [message.convert(text="No such rank in the house")]
+
+        self.ranks[rank].info = info
+        return []
+
+    def action_bye(self, message: Message) -> List[Message]:
+        member = message.sender
+        self.members.remove(member)
+
+        x = [
+            message.convert(
+                action="push_text",
+                text=f"{member} left the group",
+                reciepents=list(self.members),
+            ),
+            message.convert(action="del_house"),
+            message.convert(
+                action="del_user_rank",
+                reciepents=list(self.members),
+                data={"rank": self.member_rank[member], "user": member},
+            ),
+        ]
+
+        del self.member_rank[member]
+        return x
+
+    def process_message(self, message: Message) -> List[Message]:
         if message.text[0] == "/":
             return self.process_special_message(message)
         else:
-            return [message.convert(reciepents=list(self.members))]
+            if message.sender not in self.muted_users:
+                return [message.convert(reciepents=list(self.members))]
+            return []
 
     def process_special_message(self, message: Message) -> List[Message]:
-        action, _ = message.text[1:].split(" ", 1)
+        action, *_ = message.text[1:].split(" ", 1)
 
         if action not in ["join", "bye"] and not self._is_allowed(
             action, message.sender
@@ -282,7 +356,13 @@ class House:
                     text="Your current power level doesn't allow this action",
                 )
             ]
+        try:
+            cmd = f"self.action_{action}(message)"
+            print("special", cmd)
+            return eval(cmd)
 
-        cmd = f"self.action_{action}(message)"
-        print("special", cmd)
-        return eval(cmd)
+        except AttributeError:
+            return [message.convert(text="No such command")]
+
+        except ValueError:
+            return [message.convert(text="invalid use of command")]

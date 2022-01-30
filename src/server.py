@@ -73,6 +73,8 @@ class Server:
             sleep(0.1)
             self.users[message.sender].add_rank(param, "king")
             sleep(0.1)
+            self.users[message.sender].add_rank(param, "pawn")
+            sleep(0.1)
             self.users[message.sender].add_user_rank(param, "king", message.sender)
             return [
                 message.convert(

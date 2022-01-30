@@ -1,5 +1,5 @@
 class CustomNode:
-    def __init__(self, type: str, icon: str, color='white') -> None:
+    def __init__(self, type: str, icon: str, color="white") -> None:
         self.type = type
         self.icon = icon
         self.pending = 0
@@ -10,9 +10,12 @@ class CustomNode:
     def change_icon(self, new_icon: str) -> None:
         self.icon = new_icon
 
-    def toggle_silence(self):
+    def change_silence(self):
         self.silent = not self.silent
 
-    def add_pending(self, count: int):
+    def change_pending(self, count: int):
         self.pending += count
 
+    def change_color(self, color: str):
+        self.color = color
+        return color
