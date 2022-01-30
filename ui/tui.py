@@ -7,7 +7,6 @@ from sys import argv
 from collections import defaultdict
 from textual.layouts.dock import DockLayout
 
-from textual.reactive import Reactive
 from textual.widgets import ScrollView, TreeClick, Static
 from .widgets import (
     Footbar,
@@ -104,6 +103,34 @@ class Tui(App):
             message.data["rank"], message.data["user"]
         )
 
+    async def perform_change_rank_color(self, message: Message):
+        await self.member_lists[message.house].change_rank_data(
+            message.data["rank"], "color", message.data["color"]
+        )
+
+    async def perform_change_rank_power(self, message: Message):
+        await self.member_lists[message.house].change_rank_data(
+            message.data["rank"], "power", message.data["power"]
+        )
+
+    async def perform_change_rank_name(self, message: Message):
+        await self.member_lists[message.house].change_rank_name(
+            message.data["rank"], message.data["name"]
+        )
+
+    async def perform_change_rank_icon(self, message: Message):
+        await self.member_lists[message.house].change_rank_data(
+            message.data["rank"], "icon", message.data["icon"]
+        )
+
+    async def perform_change_room_name(self, message: Message):
+        self.house_tree.change_room_name(message.house, message.room, message.text)
+
+    async def perform_change_room_icon(self, message: Message):
+        self.house_tree.change_room_data(
+            message.house, message.room, "icon", message.text
+        )
+
     async def execute_message(self, message: Message) -> None:
         cmd = f"self.perform_{message.action}(message)"
         await eval(cmd)
@@ -148,7 +175,7 @@ class Tui(App):
         # RIGHT WIDGETS
         if self.current_house != "HOME":
             await self.view.dock(
-                (self.member_lists[self.current_house]),
+                self.member_lists[self.current_house],
                 edge="right",
                 size=int(0.15 * x),
                 name="member_list",

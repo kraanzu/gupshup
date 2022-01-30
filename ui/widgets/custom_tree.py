@@ -5,9 +5,7 @@ from rich.console import RenderableType
 from textual.reactive import Reactive
 from src.utils import CustomNode
 
-# from .tree_control import TreeControl
 from textual.widgets import TreeControl
-# from ...src.utils import CustomNode
 
 
 class CustomTree(TreeControl):
@@ -23,7 +21,6 @@ class CustomTree(TreeControl):
 
     def on_blur(self) -> None:
         self.has_focus = False
-
 
     async def watch_hover_node(self, hover_node: NodeID) -> None:
         for node in self.nodes.values():
@@ -66,5 +63,22 @@ class CustomTree(TreeControl):
 
     def change_data_parent(self, name: str, param: str, data: str):
         node = self.root.children[self.get_node_index(self.root, name)]
-        eval(f"{node}.data.{param} = '{data}'")
+        setattr(node.data, param, data)
+        self.refresh()
+
+    def change_data_child(self, parent: str, name: str, param: str, data: str):
+        parent_node = self.root.children[self.get_node_index(self.root, parent)]
+        node = parent_node.children[self.get_node_index(parent_node, name)]
+        setattr(node.data, param, data)
+        self.refresh()
+
+    def change_name_parent(self, name: str, data: str):
+        node = self.root.children[self.get_node_index(self.root, name)]
+        setattr(node, "label", data)
+        self.refresh()
+
+    def change_name_child(self, parent: str, name: str, data: str):
+        parent_node = self.root.children[self.get_node_index(self.root, parent)]
+        node = parent_node.children[self.get_node_index(parent_node, name)]
+        setattr(node, "label", data)
         self.refresh()

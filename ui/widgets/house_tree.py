@@ -37,6 +37,8 @@ class HouseTree(CustomTree):
             "cursor": node.is_cursor,
         }
         label = Text(node.label) if isinstance(node.label, str) else node.label
+        label.stylize(node.data.color)
+
         if node.data.type == "house_root":
             color = "bold red"
         elif node.data.type == "house":
@@ -79,3 +81,15 @@ class HouseTree(CustomTree):
     def del_room(self, house: str, room: str):
         super().del_under_child(house, room)
         self.refresh()
+
+    def change_house_name(self, house: str, name: str):
+        super().change_name_parent(house, name)
+
+    def change_house_data(self, house: str, param: str, value: str):
+        super().change_data_parent(house, param, value)
+
+    def change_room_name(self, house: str, room: str, name: str):
+        super().change_name_child(house, room, name)
+
+    def change_room_data(self, house: str, room: str, param: str, value: str):
+        super().change_data_child(house, room, param, value)

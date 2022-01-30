@@ -315,6 +315,69 @@ class House:
         self.ranks[rank].info = info
         return []
 
+    def action_change_rank_icon(self, message: Message) -> List[Message]:
+        param = message.text[18:].strip()
+        rank, icon = param.split(" ", 1)
+        return [
+            message.convert(
+                action="change_rank_icon",
+                data={"rank": rank, "icon": icon},
+                reciepents=list(self.members),
+            )
+        ]
+
+    def action_change_rank_name(self, message: Message) -> List[Message]:
+        param = message.text[18:].strip()
+        rank, name = param.split(" ", 1)
+        return [
+            message.convert(
+                action="change_rank_name",
+                data={"rank": rank, "name": name},
+                reciepents=list(self.members),
+            )
+        ]
+
+    def action_change_rank_color(self, message: Message) -> List[Message]:
+        param = message.text[19:].strip()
+        rank, color = param.split(" ", 1)
+        return [
+            message.convert(
+                action="change_rank_color",
+                data={"rank": rank, "color": color},
+                reciepents=list(self.members),
+            )
+        ]
+
+    def action_change_rank_power(self, message: Message) -> List[Message]:
+        param = message.text[19:].strip()
+        rank, power = param.split(" ", 1)
+        return [
+            message.convert(
+                action="change_rank_power",
+                data={"rank": rank, "power": power},
+                reciepents=list(self.members),
+            )
+        ]
+    def action_change_room_name(self, message: Message) -> List[Message]:
+        name = message.text[18:].strip()
+        return [
+            message.convert(
+                action="change_room_name",
+                text=name,
+                reciepents=list(self.members),
+            )
+        ]
+
+    def action_change_room_icon(self, message: Message) -> List[Message]:
+        name = message.text[18:].strip()
+        return [
+            message.convert(
+                action="change_room_icon",
+                text=name,
+                reciepents=list(self.members),
+            )
+        ]
+
     def action_bye(self, message: Message) -> List[Message]:
         member = message.sender
         self.members.remove(member)

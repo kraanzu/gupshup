@@ -34,6 +34,8 @@ class MemberList(CustomTree):
         }
 
         label = Text(node.label) if isinstance(node.label, str) else node.label
+        label.stylize(node.data.color)
+
         if is_hover:
             label.stylize("bold blue" if node.data.type == "member_root" else "magenta")
 
@@ -62,3 +64,6 @@ class MemberList(CustomTree):
     async def change_rank_data(self, rank: str, param: str, value: str):
         super().change_data_parent(rank, param, value)
         self.refresh()
+
+    async def change_rank_name(self, rank: str, name: str):
+        super().change_name_parent(rank, name)
