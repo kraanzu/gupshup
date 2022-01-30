@@ -1,9 +1,8 @@
 from textual.widget import Widget
 
 from rich.console import RenderableType
-from rich.panel import Panel
 
-from collections import defaultdict
+from src.utils import Message
 
 import logging
 
@@ -21,6 +20,7 @@ class ChatScreen(Widget):
     def render(self) -> RenderableType:
         return self.chats
 
-    def push_text(self, msg: str) -> None:
-        self.chats += "\n" + msg
+    def push_text(self, msg: Message) -> None:
+        color = "red" if msg.sender == "SERVER" else "magenta"
+        self.chats += f"\n[{color}]{msg.sender}[/{color}]: {msg.text}"
         self.refresh()

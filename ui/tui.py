@@ -46,39 +46,32 @@ class Tui(App):
         await self.bind(
             "escape", "reset_focus", "resets focus to the header", show=False
         )
-        await self.bind("ctrl+s", "send_message")
-        await self.bind("ctrl+r", "go")
 
-    async def action_go(self):
-        await self.refresh_screen()
-        # self.view.named_widgets["member_list"].visible = not self.view.named_widgets[
-        #     "member_list"
-        # ].visible
+    async def on_key(self, event: events.Key):
+        if event.key == "enter":
+            await self.action_send_message()
 
     async def action_send_message(self):
 
         value = self.input_box.value.strip().strip("\n")
-        if value[0] != "-":
-            if not value:
-                return
+        if not value:
+            return
 
-            self.client.send(
-                Message(
-                    sender=self.user,
-                    house=self.current_house,
-                    room=self.current_room,
-                    text=value,
-                )
+        self.client.send(
+            Message(
+                sender=self.user,
+                house=self.current_house,
+                room=self.current_room,
+                text=value,
             )
-        else:
-            pass
+        )
 
         self.input_box.value = ""
         self.input_box.refresh()
 
     async def perform_push_text(self, message: Message):
         screen = f"{message.house}/{message.room}"
-        self.chat_screen[screen].push_text(message.text)
+        self.chat_screen[screen].push_text(message)
         if self.current_screen == screen:
             await self.refresh_screen()
 
@@ -113,7 +106,6 @@ class Tui(App):
 
     async def execute_message(self, message: Message) -> None:
         cmd = f"self.perform_{message.action}(message)"
-        self.chat_screen[self.current_screen].push_text(cmd)
         await eval(cmd)
 
     async def server_listen(self) -> None:
@@ -181,13 +173,16 @@ class Tui(App):
             name="current_screen_bar",
         )
         await self.view.dock(
-            self.chat_screen[self.current_screen],
+            ScrollView(self.chat_screen[self.current_screen], gutter=(0, 1)),
             size=percent(75, y),
             name="chat_screen",
         )
         await self.view.dock(self.input_box, size=percent(10, y), name="input_box")
 
     async def update_chat_screen(self, house: str, room: str):
+        if self.current_house == house and self.current_room == room:
+            return
+
         self.current_house = house
         self.current_room = room
         self.current_screen = f"{self.current_house}/{self.current_room}"
@@ -216,7 +211,7 @@ class Tui(App):
                 await node.toggle()
 
             case "member":
-                await self.update_chat_screen(self.user, str(node.label))
+                await self.update_chat_screen("HOME", "general")
 
     async def action_reset_focus(self):
         await self.headbar.focus()

@@ -6,7 +6,7 @@ from collections import defaultdict
 
 class House:
     def __init__(self, name: str, king: str) -> None:
-        self.type = "private"
+        self.type = "open"
         self.name = name
         self.king = king
         self.rooms = {"general"}
@@ -20,7 +20,8 @@ class House:
             "king": Rank("king", "red", float("inf")),
             "pawn": Rank("pawn"),
         }
-        self.power_levels: Dict[str, float] = {"king": float("inf")}
+        self.power_levels: Dict[str, float] = defaultdict(int)
+        self.power_levels["king"] = float("inf")
         self.required_power: Dict[str, float] = defaultdict(lambda: float("inf"))
 
     def _is_allowed(self, action: str, user: str) -> bool:
@@ -68,6 +69,7 @@ class House:
         return [
             Message(
                 action="push_text",
+                sender="SERVER",
                 house=self.name,
                 room="general",
                 text=f"A wild {user} appeared!",
@@ -121,7 +123,6 @@ class House:
         self.mute_member(user)
         return [
             message.convert(
-                action="success",
                 text="The user has been muted",
                 reciepents=list(self.members),
             ),
@@ -135,7 +136,6 @@ class House:
         self.unmute_member(user)
         return [
             message.convert(
-                action="success",
                 text=f"user {user} was muted by {message.sender}",
                 reciepents=list(self.members),
             ),
@@ -302,7 +302,7 @@ class House:
     def action_rank_info(self, message: Message) -> List[Message]:
         rank = message.text[11:].strip()
         if rank not in self.ranks:
-            return [message.convert(text="No such rank in the house")]
+            return [message.convert(sender="SERVER", text="No such rank in the house")]
 
         return [message.convert(text=self.ranks[rank].info)]
 
@@ -352,7 +352,6 @@ class House:
         ):
             return [
                 message.convert(
-                    action="warn",
                     text="Your current power level doesn't allow this action",
                 )
             ]

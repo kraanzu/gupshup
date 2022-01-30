@@ -25,6 +25,8 @@ class Server:
 
     def action_join(self, message: Message):
         house = message.text[6:]
+        if house not in self.houses:
+            return [message.convert(sender="SERVER", text="No such house")]
         return self.houses[house].process_message(message)
 
     def action_add_room(self, message) -> List[Message]:
