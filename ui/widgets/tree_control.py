@@ -9,13 +9,12 @@ from rich.text import Text, TextType
 from rich.tree import Tree
 from rich.padding import PaddingDimensions
 
-from .. import log
-from .. import events
-from ..reactive import Reactive
-from .._types import MessageTarget
-from ..widget import Widget
-from ..message import Message
-from ..messages import CursorMove
+from textual import events
+from textual.reactive import Reactive
+from textual._types import MessageTarget
+from textual.widget import Widget
+from textual.message import Message
+from textual.messages import CursorMove
 
 
 NodeID = NewType("NodeID", int)
@@ -146,14 +145,14 @@ class TreeNode(Generic[NodeDataType]):
     async def expand(self, expanded: bool = True) -> None:
         self._expanded = expanded
         self._tree.expanded = expanded
-        self._control.refresh(layout=True)
+        self._control.refresh(layout=False)
 
     async def toggle(self) -> None:
         await self.expand(not self._expanded)
 
     async def add(self, label: TextType, data: NodeDataType) -> None:
         await self._control.add(self.id, label, data=data)
-        self._control.refresh(layout=True)
+        self._control.refresh(layout=False)
         self._empty = False
 
     def __rich__(self) -> RenderableType:
@@ -194,9 +193,9 @@ class TreeControl(Generic[NodeDataType], Widget):
         self.padding = padding
 
     hover_node: Reactive[NodeID | None] = Reactive(None)
-    cursor: Reactive[NodeID] = Reactive(NodeID(0), layout=True)
+    cursor: Reactive[NodeID] = Reactive(NodeID(0), layout=False)
     cursor_line: Reactive[int] = Reactive(0, repaint=False)
-    show_cursor: Reactive[bool] = Reactive(False, layout=True)
+    show_cursor: Reactive[bool] = Reactive(False, layout=False)
 
     def watch_show_cursor(self, value: bool) -> None:
         self.emit_no_wait(CursorMove(self, self.cursor_line))
@@ -221,7 +220,7 @@ class TreeControl(Generic[NodeDataType], Widget):
         child_tree.label = child_node
         self.nodes[self.id] = child_node
 
-        self.refresh(layout=True)
+        self.refresh(layout=False)
 
     def find_cursor(self) -> int | None:
         """Find the line location for the cursor node."""

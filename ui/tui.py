@@ -115,8 +115,6 @@ class Tui(App):
         cmd = f"self.perform_{message.action}(message)"
         self.chat_screen[self.current_screen].push_text(cmd)
         await eval(cmd)
-        # self.member_lists[self.current_house].refresh()
-        # self.chat_screen[self.current_screen].refresh()
 
     async def server_listen(self) -> None:
         if self.queue.qsize():
@@ -153,11 +151,12 @@ class Tui(App):
 
         x, y = os.get_terminal_size()
         await self.view.dock(self.headbar, name="headbar")
+        await self.member_lists[self.current_house].root.expand()
 
         # RIGHT WIDGETS
         if self.current_house != "HOME":
             await self.view.dock(
-                ScrollView(self.member_lists[self.current_house]),
+                (self.member_lists[self.current_house]),
                 edge="right",
                 size=int(0.15 * x),
                 name="member_list",
@@ -187,7 +186,6 @@ class Tui(App):
             name="chat_screen",
         )
         await self.view.dock(self.input_box, size=percent(10, y), name="input_box")
-        await self.member_lists[self.current_house].root.expand()
 
     async def update_chat_screen(self, house: str, room: str):
         self.current_house = house

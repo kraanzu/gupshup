@@ -1,10 +1,12 @@
 from rich.text import TextType, Text
-from textual.widgets import TreeControl, TreeClick, NodeID, TreeNode
+from textual.widgets import TreeClick, NodeID, TreeNode
 from rich.console import RenderableType
 
 from textual.reactive import Reactive
 from src.utils import CustomNode
 
+# from .tree_control import TreeControl
+from textual.widgets import TreeControl
 # from ...src.utils import CustomNode
 
 
