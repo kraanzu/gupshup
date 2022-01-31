@@ -1,7 +1,7 @@
 from struct import pack, unpack
 from socket import socket
-from pickle import dump, dumps, loads
 from sys import getsizeof as sizeof
+from pickle import dump, dumps, loads
 from .message import Message
 
 
