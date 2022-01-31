@@ -1,4 +1,4 @@
-from rich.text import Text, TextType
+from rich.text import Text
 from rich.console import RenderableType
 
 from textual.widgets import TreeNode
@@ -9,22 +9,18 @@ from src.utils import CustomNode
 class MemberList(CustomTree):
     def __init__(self) -> None:
         name = Text("Members", style="bold red")
-        super().__init__(name, CustomNode(type="member_root", icon="", color='red'))
+        super().__init__(name, CustomNode(type="member_root", icon="", color="red"))
 
     def render_node(self, node: TreeNode) -> RenderableType:
         return self.render_tree_label(
             node,
-            node.is_cursor,
             node.id == self.hover_node,
-            self.has_focus,
         )
 
     def render_tree_label(
         self,
         node: TreeNode,
-        is_cursor: bool,
         is_hover: bool,
-        has_focus: bool,
     ):
 
         meta = {

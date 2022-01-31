@@ -1,12 +1,6 @@
 from textual.widget import Widget
-
 from rich.console import RenderableType
-
 from src.utils import Message
-
-import logging
-
-logging.basicConfig(filename="tui.log", encoding="utf-8", level=logging.DEBUG)
 
 
 class ChatScreen(Widget):

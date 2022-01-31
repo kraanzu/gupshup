@@ -1,9 +1,6 @@
-from os import get_terminal_size
-from rich.panel import Panel
-from rich.box import SIMPLE
-from rich.text import TextType, Text
+from rich.text import Text
 from rich.console import RenderableType
-from textual.widgets import TreeNode, NodeID
+from textual.widgets import TreeNode
 
 from .custom_tree import CustomTree
 from src.utils import CustomNode
@@ -56,7 +53,7 @@ class HouseTree(CustomTree):
         icon_label = Text(f"{icon} ", no_wrap=True, overflow="ellipsis") + label
 
         if node.data.silent:
-            icon_label += Text("ﱝ", no_wrap=True, overflow="ellipsis")
+            icon_label += Text(" ﱝ", no_wrap=True, overflow="ellipsis")
 
         icon_label.apply_meta(meta)
 
