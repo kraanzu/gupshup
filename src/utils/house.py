@@ -131,12 +131,12 @@ class House:
     def action_unmute(self, message: Message) -> List[Message]:
         user = message.text[8:].strip()
         if user not in self.muted_users:
-            return [message.convert(action="warn", text="The user is not muted")]
+            return [message.convert(text="The user is not muted")]
 
         self.unmute_member(user)
         return [
             message.convert(
-                text=f"user {user} was muted by {message.sender}",
+                text=f"user {user} was unmuted by {message.sender}",
                 reciepents=list(self.members),
             ),
         ]
@@ -192,7 +192,6 @@ class House:
                 text="Your request has been sent to the king of the house",
             ),
             message.convert(
-                sender="SERVER",
                 house=self.name,
                 room="general",
                 text=f"User {message.sender} has requested to join the group",
@@ -200,14 +199,13 @@ class House:
             ),
         ]
 
+    def action_toggle_silent(self, message: Message) -> List[Message]:
+        return [message.convert(action="toggle_silent")]
+
     def action_add_room(self, message: Message) -> List[Message]:
         room = message.text[10:]
         if room in self.rooms:
-            return [
-                message.convert(
-                    action="warn", text="There is already a room with same name!"
-                )
-            ]
+            return [message.convert(text="There is already a room with same name!")]
 
         self.add_room(room)
         return [
@@ -219,7 +217,7 @@ class House:
         if user not in self.waiting_users:
             return [
                 message.convert(
-                    house=self.name,
+                    # house=self.name,
                     room="general",
                     text=f"no such user({user}) in the waiting list",
                     reciepents=[self.king],
@@ -236,7 +234,6 @@ class House:
         self.ban_user(user)
         return [
             message.convert(
-                sender="SERVER",
                 text=f"user {user} was banned by {message.sender}",
                 reciepents=list(self.members),
             )
@@ -250,7 +247,6 @@ class House:
         self.unban_user(user)
         return [
             message.convert(
-                sender="SERVER",
                 text=f"user {user} was unbanned by {message.sender}",
                 reciepents=list(self.members),
             )
@@ -295,6 +291,29 @@ class House:
 
     # TODO: change_rank_name
     # TODO: assign_rank
+    def action_assign_rank(self, message: Message) -> List[Message]:
+        param = message.text[13:].strip()
+        user, rank = param.split(" ", 1)
+        if user not in self.members:
+            return [message.convert(text="no such user in the house")]
+
+        prev_rank = self.member_rank[user]
+        if prev_rank == rank:
+            return [message.convert(text="this user already has this rank")]
+
+        self.member_rank[user] = rank
+        return [
+            message.convert(
+                action="del_user_rank",
+                data={"rank": prev_rank, "user": user},
+                reciepents=list(self.members),
+            ),
+            message.convert(
+                action="add_user_rank",
+                data={"rank": rank, "user": user},
+                reciepents=list(self.members),
+            ),
+        ]
 
     def action_list_ranks(self, message: Message) -> List[Message]:
         return [message.convert(text=f"The ranks are: {', '.join(self.ranks)}")]
@@ -302,7 +321,7 @@ class House:
     def action_rank_info(self, message: Message) -> List[Message]:
         rank = message.text[11:].strip()
         if rank not in self.ranks:
-            return [message.convert(sender="SERVER", text="No such rank in the house")]
+            return [message.convert(text="No such rank in the house")]
 
         return [message.convert(text=self.ranks[rank].info)]
 
@@ -318,6 +337,7 @@ class House:
     def action_change_rank_icon(self, message: Message) -> List[Message]:
         param = message.text[18:].strip()
         rank, icon = param.split(" ", 1)
+        self.ranks[rank].icon = icon
         return [
             message.convert(
                 action="change_rank_icon",
@@ -340,6 +360,7 @@ class House:
     def action_change_rank_color(self, message: Message) -> List[Message]:
         param = message.text[19:].strip()
         rank, color = param.split(" ", 1)
+        self.ranks[rank].color = color
         return [
             message.convert(
                 action="change_rank_color",
@@ -358,6 +379,7 @@ class House:
                 reciepents=list(self.members),
             )
         ]
+
     def action_change_room_name(self, message: Message) -> List[Message]:
         name = message.text[18:].strip()
         return [
@@ -370,6 +392,7 @@ class House:
 
     def action_change_room_icon(self, message: Message) -> List[Message]:
         name = message.text[18:].strip()
+        print(message.text)
         return [
             message.convert(
                 action="change_room_icon",
@@ -384,7 +407,6 @@ class House:
 
         x = [
             message.convert(
-                action="push_text",
                 text=f"{member} left the group",
                 reciepents=list(self.members),
             ),
@@ -404,7 +426,7 @@ class House:
             return self.process_special_message(message)
         else:
             if message.sender not in self.muted_users:
-                return [message.convert(reciepents=list(self.members))]
+                return [message.convert(sender="self", reciepents=list(self.members))]
             return []
 
     def process_special_message(self, message: Message) -> List[Message]:

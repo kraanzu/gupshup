@@ -5,7 +5,7 @@ from copy import deepcopy
 class Message:
     def __init__(
         self,
-        sender: str = "",
+        sender: str = "SERVER",
         house: str = "",
         room: str = "",
         text: str = "",
@@ -31,7 +31,7 @@ class Message:
 
     def convert(
         self,
-        sender: str = "",
+        sender: str = "SERVER",
         action: str = "push_text",
         text: str = "",
         house: str = "",
@@ -48,12 +48,11 @@ class Message:
             message.house = house
         if text:
             message.text = text
-        if sender:
-            message.sender = sender
+        if sender == "SERVER":
+            message.sender = "SERVER"
 
         message.data = data
 
-        # print(message, message.action)
         return message
 
     def __repr__(self):

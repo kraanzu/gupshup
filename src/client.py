@@ -1,8 +1,6 @@
 import socket
-import loguru
 from threading import Thread
 from queue import Queue
-from pickle import dumps, loads
 
 from .utils import Message, Channel
 
@@ -18,18 +16,29 @@ class Client:
         self.online = True
 
     def send(self, message: Message):
-        self.channel.send(message)
-
-    # def send(self, message: str):
-    #     self.channel.send(message)
+        try:
+            self.channel.send(message)
+        except:
+            self.try_reconnect()
 
     def listen_from_server(self):
         while 1:
             try:
                 data = self.channel.recv()
                 self.queue.put(data)
-            except Exception as e:
-                self.queue.put("cannnooott")
+            except:
+                self.queue.put(Message(action="connection_disable"))
+                while not self.try_reconnect():
+                    pass
+                self.queue.put(Message(action="connection_enable"))
+
+    def try_reconnect(self):
+        try:
+            self.conn.connect((HOST, PORT))
+            self.conn.sendall(b"")
+            return True
+        except:
+            return False
 
     def start_connection(self):
         try:

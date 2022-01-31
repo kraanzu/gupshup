@@ -18,17 +18,13 @@ class HouseTree(CustomTree):
     def render_node(self, node: TreeNode) -> RenderableType:
         return self.render_tree_label(
             node,
-            node.is_cursor,
             node.id == self.hover_node,
-            self.has_focus,
         )
 
     def render_tree_label(
         self,
         node: TreeNode,
-        is_cursor: bool,
         is_hover: bool,
-        has_focus: bool,
     ):
 
         meta = {
@@ -58,6 +54,10 @@ class HouseTree(CustomTree):
 
         icon = node.data.icon
         icon_label = Text(f"{icon} ", no_wrap=True, overflow="ellipsis") + label
+
+        if node.data.silent:
+            icon_label += Text("ﱝ", no_wrap=True, overflow="ellipsis")
+
         icon_label.apply_meta(meta)
 
         return icon_label
@@ -81,6 +81,11 @@ class HouseTree(CustomTree):
     def del_room(self, house: str, room: str):
         super().del_under_child(house, room)
         self.refresh()
+
+    def toggle_silent(self, house: str, room: str):
+        house_node = self.root.children[self.get_node_index(self.root, house)]
+        room_node = house_node.children[self.get_node_index(house_node, room)]
+        room_node.data.silent = not room_node.data.silent
 
     def change_house_name(self, house: str, name: str):
         super().change_name_parent(house, name)

@@ -18,6 +18,16 @@ class Server:
         self.houses: Dict[str, House] = dict()
 
     def broadcast(self, message: Message, reciepents: List[str]):
+        if message.house != "HOME" and message.sender != "SERVER":
+            house = self.houses[message.house]
+            color = house.ranks[house.member_rank[message.sender]].color
+        elif message.sender == "SERVER":
+            color = "red"
+        else:
+            color = "magenta"
+
+        message.sender = f"[{color}]{message.sender}[/{color}]"
+
         for user in reciepents:
             self.users[user].send(message)
         # TODO: modify `Channel` class so that this sleep is not needed
@@ -26,7 +36,7 @@ class Server:
     def action_join(self, message: Message):
         house = message.text[6:]
         if house not in self.houses:
-            return [message.convert(sender="SERVER", text="No such house")]
+            return [message.convert(text="No such house")]
         return self.houses[house].process_message(message)
 
     def action_add_room(self, message) -> List[Message]:
@@ -70,15 +80,28 @@ class Server:
                 )
             ]
         else:
+            message.house = param
             self.houses[param] = House(param, message.sender)
-            self.users[message.sender].add_house(param)
-            sleep(0.1)
-            self.users[message.sender].add_rank(param, "king")
-            sleep(0.1)
-            self.users[message.sender].add_rank(param, "pawn")
-            sleep(0.1)
-            self.users[message.sender].add_user_rank(param, "king", message.sender)
             return [
+                message.convert(action="add_house", text=param),
+                message.convert(action="add_rank", text="king"),
+                message.convert(action="add_rank", text="pawn"),
+                message.convert(
+                    action="add_user_rank",
+                    data={"rank": "king", "user": message.sender},
+                ),
+                message.convert(
+                    action="change_rank_color",
+                    data={"rank": "king", "color": "red"},
+                ),
+                message.convert(
+                    action="change_rank_icon",
+                    data={"rank": "king", "icon": ""},
+                ),
+                message.convert(
+                    action="change_rank_icon",
+                    data={"rank": "pawn", "icon": ""},
+                ),
                 message.convert(
                     text="Your new house is ready to rock!",
                 ),
@@ -112,7 +135,7 @@ class Server:
             self.users[message.sender].silent_user(param)
             return [
                 message.convert(
-                    text=f"messages from `{param}` won't have a notification now",
+                    text=f"messages from `{param}` won't have a notification ring now",
                 )
             ]
 
@@ -130,7 +153,7 @@ class Server:
 
     def handle_user_message(self, message: Message) -> List[Message]:
         text = message.text
-        if message.room == "general" and text[0] in "?/":
+        if message.room == "general" and text[0] in "/":
             try:
                 action, _ = text[1:].split(" ", 1)
                 cmd = f"self.action_{action}(message)"
@@ -152,15 +175,15 @@ class Server:
                 ]
         else:
             if message.room == "general":
-                return [message.convert()]
+                return [message.convert(sender="self")]
             else:
                 if self.users[message.room].has_banned(message.sender):
-                    return [message.convert()]
+                    return [message.convert(sender="self")]
 
                 self.users[message.room].add_chat(message.sender)
                 return [
                     message.convert(room=message.sender, reciepents=[message.room]),
-                    message.convert(),
+                    message.convert(sender="self"),
                 ]
 
     def serve_user(self, user: str):

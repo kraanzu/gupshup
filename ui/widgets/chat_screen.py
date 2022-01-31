@@ -20,7 +20,6 @@ class ChatScreen(Widget):
     def render(self) -> RenderableType:
         return self.chats
 
-    def push_text(self, msg: Message) -> None:
-        color = "red" if msg.sender == "SERVER" else "magenta"
-        self.chats += f"\n[{color}]{msg.sender}[/{color}]: {msg.text}"
+    def push_text(self, message: Message) -> None:
+        self.chats += f"\n{message.sender}: {message.text}"
         self.refresh()

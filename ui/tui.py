@@ -1,15 +1,14 @@
 import logging
 import os
 from queue import Queue
-from textual.app import App
-from textual import events, message, message_pump
+from textual import events
 from sys import argv
 from collections import defaultdict
-from textual.layouts.dock import DockLayout
 
+from textual.app import App
+from textual.layouts.dock import DockLayout
 from textual.widgets import ScrollView, TreeClick, Static
 from .widgets import (
-    Footbar,
     Headbar,
     ChatScreen,
     TextInput,
@@ -40,7 +39,7 @@ class Tui(App):
 
         self.set_interval(0.2, self.server_listen)
 
-        await self.bind("ctrl+b", "view.toggle('sidebar')", "toggle sidebar")
+        await self.bind("ctrl+b", "view.toggle('house_tree')", "toggle house tree")
         await self.bind("ctrl+q", "quit", "Quit")
         await self.bind(
             "escape", "reset_focus", "resets focus to the header", show=False
@@ -67,6 +66,12 @@ class Tui(App):
 
         self.input_box.value = ""
         self.input_box.refresh()
+
+    async def perform_connection_disable(self, _):
+        self.headbar.status = "ﮡ Can't connect"
+
+    async def perform_connection_enable(self, _):
+        self.headbar.status = " Online"
 
     async def perform_push_text(self, message: Message):
         screen = f"{message.house}/{message.room}"
@@ -131,6 +136,9 @@ class Tui(App):
             message.house, message.room, "icon", message.text
         )
 
+    async def perform_toggle_silent(self, message: Message):
+        self.house_tree.toggle_silent(message.house, message.room)
+
     async def execute_message(self, message: Message) -> None:
         cmd = f"self.perform_{message.action}(message)"
         await eval(cmd)
@@ -142,9 +150,10 @@ class Tui(App):
 
     async def on_mount(self, _: events.Mount) -> None:
         y = os.get_terminal_size()[1]
+
+        self.title = "Welcome to Gupshup"
         self.headbar = Headbar()
-        self.footbar = Footbar()
-        self.input_box = TextInput(placeholder="Speak your mind here...")
+        self.input_box = TextInput(placeholder="Say something here...")
 
         self.banner = Banner()
         self.chat_screen = defaultdict(ChatScreen)
@@ -158,6 +167,9 @@ class Tui(App):
         )
 
         self.set_interval(0.8, self.server_listen)
+        await self.refresh_screen()
+
+    async def on_resize(self, _: events.Resize) -> None:
         await self.refresh_screen()
 
     async def refresh_screen(self):
@@ -197,7 +209,7 @@ class Tui(App):
         await self.view.dock(
             self.banner,
             size=percent(10, y),
-            name="current_screen_bar",
+            name="banner",
         )
         await self.view.dock(
             ScrollView(self.chat_screen[self.current_screen], gutter=(0, 1)),
@@ -207,6 +219,7 @@ class Tui(App):
         await self.view.dock(self.input_box, size=percent(10, y), name="input_box")
 
     async def update_chat_screen(self, house: str, room: str):
+        # TODO: Make this reactive
         if self.current_house == house and self.current_room == room:
             return
 

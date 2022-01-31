@@ -9,7 +9,7 @@ from src.utils import CustomNode
 class MemberList(CustomTree):
     def __init__(self) -> None:
         name = Text("Members", style="bold red")
-        super().__init__(name, CustomNode(type="member_root", icon=""))
+        super().__init__(name, CustomNode(type="member_root", icon="", color='red'))
 
     def render_node(self, node: TreeNode) -> RenderableType:
         return self.render_tree_label(
@@ -37,7 +37,7 @@ class MemberList(CustomTree):
         label.stylize(node.data.color)
 
         if is_hover:
-            label.stylize("bold blue" if node.data.type == "member_root" else "magenta")
+            label.stylize("bold red" if node.data.type == "member_root" else "magenta")
 
         icon = node.data.icon
         icon_label = Text(f"{icon} ", no_wrap=True, overflow="ellipsis") + label
@@ -46,11 +46,11 @@ class MemberList(CustomTree):
         return icon_label
 
     async def add_rank(self, name: str) -> None:
-        await super().add_under_root(name, CustomNode(type="rank", icon="R"))
+        await super().add_under_root(name, CustomNode(type="rank", icon=""))
         self.refresh()
 
     async def add_user_to_rank(self, rank: str, user: str) -> None:
-        await self.add_under_child(rank, user, CustomNode("type=member", icon="m"))
+        await self.add_under_child(rank, user, CustomNode("type=member", icon=""))
         self.refresh()
 
     async def del_from_rank(self, rank: str, member: str):
