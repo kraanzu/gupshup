@@ -1,6 +1,7 @@
 from typing import Dict, List, Literal
 from .message import Message
 from .rank import Rank
+from .message_templates import welcome_message, kick_message, mute_message
 from collections import defaultdict
 
 
@@ -72,7 +73,7 @@ class House:
                 sender="SERVER",
                 house=self.name,
                 room="general",
-                text=f"A wild {user} appeared!",
+                text=welcome_message(user),
                 reciepents=list(self.members),
             ),
             Message(
@@ -123,9 +124,10 @@ class House:
         self.mute_member(user)
         return [
             message.convert(
-                text="The user has been muted",
+                text=f"{user} was talking too much and thus was muted by {message.sender}",
                 reciepents=list(self.members),
             ),
+            message.convert(text=mute_message(), reciepents=[user]),
         ]
 
     def action_unmute(self, message: Message) -> List[Message]:
@@ -157,6 +159,7 @@ class House:
                 reciepents=list(self.members),
                 data={"rank": self.member_rank[member], "user": member},
             ),
+            message.convert(house="HOME", room="general", text=kick_message(self.name)),
         ]
         del self.member_rank[member]
         return x
