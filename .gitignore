@@ -1,6 +1,9 @@
 # test folder
 tests/
 
+#just in case anything goes wrong :)
+textual/
+
 # Editors
 .vscode/
 .idea/
