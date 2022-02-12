@@ -96,6 +96,8 @@ class Tui(App):
                 self.chat_scroll.max_scroll_y + self.chat_scroll.y,
                 easing="none",
             )
+        elif not self.house_tree.is_room_silent(message.house, message.room):
+            self.console.bell()
 
     async def perform_add_room(self, message: Message):
         await self.house_tree.add_room(message.house, message.text)
