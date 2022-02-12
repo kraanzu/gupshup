@@ -1,4 +1,3 @@
-import logging
 import os
 from queue import Queue
 from textual import events
@@ -19,8 +18,6 @@ from .widgets import (
 
 from ..src import Client
 from ..src.utils import Message, House
-
-logging.basicConfig(filename="tui.log", encoding="utf-8", level=logging.DEBUG)
 
 percent = lambda percent, total: int(percent * total / 100)
 
@@ -91,7 +88,12 @@ class Tui(App):
         screen = f"{message.house}/{message.room}"
         self.chat_screen[screen].push_text(message)
         if self.current_screen == screen:
-            await self.refresh_screen()
+            await self.chat_scroll.update(self.chat_screen[screen].chats, home=False)
+            self.chat_scroll.animate(
+                "y",
+                self.chat_scroll.max_scroll_y + self.chat_scroll.y,
+                easing="none",
+            )
 
     async def perform_add_house(self, message: Message):
         await self.house_tree.add_house(message.text)
@@ -171,6 +173,7 @@ class Tui(App):
 
         self.banner = Banner()
         self.chat_screen = defaultdict(ChatScreen)
+        self.chat_scroll = ScrollView(gutter=(0, 1))
 
         self.house_tree = HouseTree()
         await self.house_tree.add_house("HOME")
@@ -196,6 +199,16 @@ class Tui(App):
 
     async def refresh_screen(self):
         await self._clear_screen()
+        await self.chat_scroll.update(
+            self.chat_screen[self.current_screen].chats, home=False
+        )
+
+        self.chat_scroll.animate(
+            "y",
+            10**5,
+            easing="none",
+            speed=1000,
+        )
 
         x, y = os.get_terminal_size()
         await self.view.dock(self.headbar, name="headbar")
@@ -229,7 +242,7 @@ class Tui(App):
             name="banner",
         )
         await self.view.dock(
-            ScrollView(self.chat_screen[self.current_screen], gutter=(0, 1)),
+            self.chat_scroll,
             size=percent(75, y),
             name="chat_screen",
         )
