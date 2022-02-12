@@ -1,6 +1,6 @@
 from textual.widget import Widget
 from rich.console import RenderableType
-from src.utils import Message
+from ...src.utils import Message
 
 
 class ChatScreen(Widget):

@@ -17,8 +17,8 @@ from .widgets import (
     Banner,
 )
 
-from src import Client
-from src.utils import Message
+from ..src import Client
+from ..src.utils import Message
 
 logging.basicConfig(filename="tui.log", encoding="utf-8", level=logging.DEBUG)
 

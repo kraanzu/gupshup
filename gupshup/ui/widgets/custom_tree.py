@@ -2,7 +2,7 @@ from rich.text import TextType
 from textual.widgets import NodeID, TreeNode
 from textual.reactive import Reactive
 from textual.widgets import TreeControl
-from src.utils import CustomNode
+from ...src.utils import CustomNode
 
 
 class CustomTree(TreeControl):

@@ -3,7 +3,7 @@ from rich.console import RenderableType
 from textual.widgets import TreeNode
 
 from .custom_tree import CustomTree
-from src.utils import CustomNode
+from ...src.utils import CustomNode
 
 
 class HouseTree(CustomTree):

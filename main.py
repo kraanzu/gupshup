@@ -1,6 +1,6 @@
-from ui import Tui
 import sys
-from src.server import Server
+from gupshup.ui import Tui
+from gupshup.src.server import Server
 
 if sys.argv[1].lower() == "server":
     server = Server()
