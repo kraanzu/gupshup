@@ -1,8 +1,22 @@
-from typing import Dict, List, Literal
+from typing import Dict, List
 from .message import Message
 from .rank import Rank
 from .message_templates import welcome_message, kick_message, mute_message
 from collections import defaultdict
+
+
+class HouseData:
+    def __init__(
+        self,
+        name: str,
+        room_icons: dict[str, str],
+        ranks: dict[str, Rank],
+        member_ranks: dict[str, str],
+    ):
+        self.name = name
+        self.room_icons = dict(room_icons)
+        self.ranks = dict(ranks)
+        self.member_ranks = dict(member_ranks)
 
 
 class House:
@@ -11,6 +25,7 @@ class House:
         self.name = name
         self.king = king
         self.rooms = {"general"}
+        self.room_icons = defaultdict(lambda: "ﴘ")
         self.members = set([king])
         self.banned_users = set()
         self.muted_users = set()
@@ -18,8 +33,8 @@ class House:
         self.waiting_users = set()
         self.member_rank: Dict[str, str] = {king: "king"}
         self.ranks: Dict[str, Rank] = {
-            "king": Rank("king", "red", float("inf")),
-            "pawn": Rank("pawn"),
+            "king": Rank("king", "red", float("inf"), icon=""),
+            "pawn": Rank("pawn", icon=""),
         }
         self.power_levels: Dict[str, float] = defaultdict(int)
         self.power_levels["king"] = float("inf")
@@ -64,10 +79,17 @@ class House:
     def toggle_type(self):
         self.type = "open" if self.type == "private" else "private"
 
+    def _generate_house_data(self) -> HouseData:
+        return HouseData(self.name, self.room_icons, self.ranks, self.member_rank)
+
     def add_member(self, user: str) -> List[Message]:
         self.members.add(user)
-        self.member_rank[user] = "pawn"
-        return [
+        x = [
+            Message(
+                action="add_house",
+                data={"house": self._generate_house_data()},
+                reciepents=[user],
+            ),
             Message(
                 action="push_text",
                 sender="SERVER",
@@ -77,44 +99,14 @@ class House:
                 reciepents=list(self.members),
             ),
             Message(
-                action="push_text",
-                sender="SERVER",
-                house="HOME",
-                room="general",
-                text=f"Yay now you are a part of the house `{self.name}` !",
-                reciepents=[user],
-            ),
-            Message(action="add_house", text=self.name, reciepents=[user]),
-            *[
-                Message(
-                    action="add_room", house=self.name, text=room, reciepents=[user]
-                )
-                for room in self.rooms
-                if room != "general"
-            ],
-            *[
-                Message(
-                    action="add_rank", house=self.name, text=rank, reciepents=[user]
-                )
-                for rank in self.ranks.keys()
-            ],
-            Message(
                 action="add_user_rank",
                 house=self.name,
                 data={"rank": "pawn", "user": user},
                 reciepents=list(self.members),
             ),
-            *[
-                Message(
-                    action="add_user_rank",
-                    house=self.name,
-                    data={"rank": rank, "user": member},
-                    reciepents=[user],
-                )
-                for member, rank in self.member_rank.items()
-                if member != user
-            ],
         ]
+        self.member_rank[user] = "pawn"
+        return x
 
     def action_mute(self, message: Message) -> List[Message]:
         user = message.text[6:].strip()
@@ -182,7 +174,6 @@ class House:
         ]
 
     def action_join(self, message: Message) -> List[Message]:
-        # print("JOIN OK")
         if message.sender in self.banned_users:
             return [message.convert(text="you have been banned from this group")]
 
@@ -268,6 +259,9 @@ class House:
     def action_destroy(self, message: Message):
         return [message.convert(action="del_house", reciepents=list(self.members))]
 
+    def action_del_chat(self, message: Message):
+        return [message.convert(action="del_chat")]
+
     def action_add_rank(self, message: Message):
         rank = message.text[10:].strip()
         if rank in self.ranks:
@@ -292,8 +286,6 @@ class House:
             ),
         ]
 
-    # TODO: change_rank_name
-    # TODO: assign_rank
     def action_assign_rank(self, message: Message) -> List[Message]:
         param = message.text[13:].strip()
         user, rank = param.split(" ", 1)
@@ -435,7 +427,7 @@ class House:
     def process_special_message(self, message: Message) -> List[Message]:
         action, *_ = message.text[1:].split(" ", 1)
 
-        if action not in ["join", "bye"] and not self._is_allowed(
+        if action not in ["del_chat", "join", "bye"] and not self._is_allowed(
             action, message.sender
         ):
             return [
@@ -449,7 +441,7 @@ class House:
             return eval(cmd)
 
         except AttributeError:
-            return [message.convert(text="No such command")]
+            return [message.convert(text="[red]No such command[/red]")]
 
         except ValueError:
-            return [message.convert(text="invalid use of command")]
+            return [message.convert(text="[red]invalid use of command![/red]")]

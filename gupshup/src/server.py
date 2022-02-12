@@ -30,10 +30,10 @@ class Server:
 
         for user in reciepents:
             self.users[user].send(message)
+
         # TODO: modify `Channel` class so that this sleep is not needed
         sleep(0.1)
 
-    # --------------------------------------------------------
     # +-------------------------------+
     # | Methods to manage user data   |
     # | When sent from `HOME`         |
@@ -43,6 +43,7 @@ class Server:
         house = message.text[6:]
         if house not in self.houses:
             return [message.convert(text="No such house")]
+
         return self.houses[house].process_message(message)
 
     def action_add_room(self, message) -> List[Message]:
@@ -72,6 +73,7 @@ class Server:
             else:
                 self.users[message.sender].add_chat(param)
                 return [
+                    message.convert(action="add_room", text=param),
                     message.convert(
                         text="You can now chat with the user",
                     ),
@@ -89,28 +91,10 @@ class Server:
             message.house = param
             self.houses[param] = House(param, message.sender)
             return [
-                message.convert(action="add_house", text=param),
-                message.convert(action="add_rank", text="king"),
-                message.convert(action="add_rank", text="pawn"),
                 message.convert(
-                    action="add_user_rank",
-                    data={"rank": "king", "user": message.sender},
-                ),
-                message.convert(
-                    action="change_rank_color",
-                    data={"rank": "king", "color": "red"},
-                ),
-                message.convert(
-                    action="change_rank_icon",
-                    data={"rank": "king", "icon": ""},
-                ),
-                message.convert(
-                    action="change_rank_icon",
-                    data={"rank": "pawn", "icon": ""},
-                ),
-                message.convert(
-                    text="Your new house is ready to rock!",
-                ),
+                    action="add_house",
+                    data={"house": self.houses[param]._generate_house_data()},
+                )
             ]
 
     def action_ban(self, message):
@@ -146,16 +130,10 @@ class Server:
             ]
 
     def action_del_chat(self, message: Message) -> List[Message]:
-        param = message.text[8:]
-        if param not in self.users[message.sender].home.rooms:
-            return [
-                message.convert(
-                    text="This user is not in your private chats",
-                ),
-            ]
-        else:
-            self.users[message.sender].del_chat(param)
-            return []
+        if message.room == "general":
+            return [message.convert(action="del_chat")]
+
+        return [message.convert(action="del_room")]
 
     # ----------------------- END OF HOME FUNCTIONS ---------------------------------
 
@@ -163,7 +141,7 @@ class Server:
         text = message.text
         if message.room == "general" and text[0] in "/":
             try:
-                action, _ = text[1:].split(" ", 1)
+                action, *_ = text[1:].split(" ", 1)
                 cmd = f"self.action_{action}(message)"
                 return eval(cmd)
 
