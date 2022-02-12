@@ -68,8 +68,10 @@ class Tui(App):
         house = message.data["house"]
         await self.house_tree.add_house(house.name)
 
-        for room, icon in house.room_icons:
+        for room in house.rooms:
             await self.house_tree.add_room(house.name, room)
+
+        for room, icon in house.room_icons:
             self.house_tree.change_data_child(house.name, room, "icon", icon)
 
         for name, rank in house.ranks.items():
@@ -96,8 +98,10 @@ class Tui(App):
                 self.chat_scroll.max_scroll_y + self.chat_scroll.y,
                 easing="none",
             )
-        elif not self.house_tree.is_room_silent(message.house, message.room):
-            self.console.bell()
+        else:
+            if not self.house_tree.is_room_silent(message.house, message.room):
+                self.console.bell()
+            self.house_tree.increase_pending(message.house, message.room)
 
     async def perform_add_room(self, message: Message):
         await self.house_tree.add_room(message.house, message.text)
@@ -265,6 +269,7 @@ class Tui(App):
         self.current_room = room
         self.current_screen = f"{self.current_house}/{self.current_room}"
 
+        self.house_tree.change_room_data(house, room, "pending", "0")
         self.banner.set_text(self.current_screen)
         self.house_tree.select(self.current_house, self.current_room)
 

@@ -68,6 +68,15 @@ class CustomTree(TreeControl):
         setattr(node.data, param, data)
         self.refresh()
 
+    def get_data_parent(self, name: str, param: str):
+        node = self.root.children[self.get_node_index(self.root, name)]
+        return getattr(node.data, param)
+
+    def get_data_child(self, parent: str, name: str, param: str):
+        parent_node = self.root.children[self.get_node_index(self.root, parent)]
+        node = parent_node.children[self.get_node_index(parent_node, name)]
+        return getattr(node.data, param)
+
     def change_name_parent(self, name: str, data: str):
         node = self.root.children[self.get_node_index(self.root, name)]
         setattr(node, "label", data)

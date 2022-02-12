@@ -55,6 +55,11 @@ class HouseTree(CustomTree):
         if node.data.silent:
             icon_label += Text(" ﱝ", no_wrap=True, overflow="ellipsis")
 
+        if node.data.pending != "0":
+            icon_label += Text(
+                f" ({node.data.pending})", no_wrap=True, overflow="ellipsis"
+            )
+
         icon_label.apply_meta(meta)
 
         return icon_label
@@ -92,6 +97,7 @@ class HouseTree(CustomTree):
         house_node = self.root.children[self.get_node_index(self.root, house)]
         room_node = house_node.children[self.get_node_index(house_node, room)]
         room_node.data.silent = not room_node.data.silent
+        self.refresh()
 
     def change_house_name(self, house: str, name: str):
         super().change_name_parent(house, name)
@@ -104,3 +110,8 @@ class HouseTree(CustomTree):
 
     def change_room_data(self, house: str, room: str, param: str, value: str):
         super().change_data_child(house, room, param, value)
+
+    def increase_pending(self, house: str, room: str):
+        current_pending = int(super().get_data_child(house, room, "pending"))
+        super().change_data_child(house, room, "pending", str(current_pending + 1))
+        self.refresh()

@@ -9,11 +9,13 @@ class HouseData:
     def __init__(
         self,
         name: str,
+        rooms: set[str],
         room_icons: dict[str, str],
         ranks: dict[str, Rank],
         member_ranks: dict[str, str],
     ):
         self.name = name
+        self.rooms = rooms
         self.room_icons = dict(room_icons)
         self.ranks = dict(ranks)
         self.member_ranks = dict(member_ranks)
@@ -80,7 +82,9 @@ class House:
         self.type = "open" if self.type == "private" else "private"
 
     def _generate_house_data(self) -> HouseData:
-        return HouseData(self.name, self.room_icons, self.ranks, self.member_rank)
+        return HouseData(
+            self.name, self.rooms, self.room_icons, self.ranks, self.member_rank
+        )
 
     def add_member(self, user: str) -> List[Message]:
         self.members.add(user)
