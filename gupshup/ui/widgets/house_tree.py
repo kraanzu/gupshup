@@ -59,6 +59,10 @@ class HouseTree(CustomTree):
 
         return icon_label
 
+    async def expand_home(self):
+        node = self.root.children[self.get_node_index(self.root, "HOME")]
+        await node.expand()
+
     def select(self, house: str, room: str):
         self.selected = [house, room]
 

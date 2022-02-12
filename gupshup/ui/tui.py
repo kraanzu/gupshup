@@ -18,7 +18,7 @@ from .widgets import (
 )
 
 from ..src import Client
-from ..src.utils import Message
+from ..src.utils import Message, House
 
 logging.basicConfig(filename="tui.log", encoding="utf-8", level=logging.DEBUG)
 
@@ -66,6 +66,20 @@ class Tui(App):
 
         self.input_box.value = ""
         self.input_box.refresh()
+
+    async def perform_attach_house(self, message: Message):
+        house: House = message.data["house"]
+        await self.house_tree.add_house(house.name)
+        for room in house.rooms:
+            await self.house_tree.add_room(house.name, room)
+
+        for name, rank in house.ranks.items():
+            await self.member_lists[house.name].add_rank(name)
+            self.member_lists[house.name].change_data_parent(name, "color", rank.color)
+            self.member_lists[house.name].change_data_parent(name, "icon", rank.icon)
+
+        for name, rank in house.member_rank.items():
+            await self.member_lists[house.name].add_user_to_rank(rank, name)
 
     async def perform_connection_disable(self, _):
         self.headbar.status = "ﮡ Can't connect"
@@ -172,13 +186,16 @@ class Tui(App):
     async def on_resize(self, _: events.Resize) -> None:
         await self.refresh_screen()
 
-    async def refresh_screen(self):
+    async def _clear_screen(self):
         # clears all the widgets from the screen..and re render them all
         # Why? you ask? this was the only way at the time of this writing
 
         if isinstance(self.view.layout, DockLayout):
             self.view.layout.docks.clear()
         self.view.widgets.clear()
+
+    async def refresh_screen(self):
+        await self._clear_screen()
 
         x, y = os.get_terminal_size()
         await self.view.dock(self.headbar, name="headbar")
@@ -251,7 +268,13 @@ class Tui(App):
                 await node.toggle()
 
             case "member":
-                await self.update_chat_screen("HOME", "general")
+                name = str(node.label)
+                if name == self.user:
+                    return
+
+                await self.house_tree.add_room("HOME", name)
+                await self.house_tree.expand_home()
+                await self.update_chat_screen("HOME", name)
 
     async def action_reset_focus(self):
         await self.headbar.focus()
