@@ -66,6 +66,11 @@ class HouseTree(CustomTree):
     def select(self, house: str, room: str):
         self.selected = [house, room]
 
+    def is_room_silent(self, house: str, room: str):
+        house_node = self.root.children[self.get_node_index(self.root, house)]
+        room_node = house_node.children[self.get_node_index(house_node, room)]
+        return room_node.data.silent
+
     async def add_house(self, name: str) -> None:
         await super().add_under_root(name, CustomNode(type="house", icon="ﳐ"))
         await self.add_room(name, "general")

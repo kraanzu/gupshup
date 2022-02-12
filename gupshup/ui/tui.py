@@ -17,7 +17,7 @@ from .widgets import (
 )
 
 from ..src import Client
-from ..src.utils import Message, House
+from ..src.utils import Message, HouseData
 
 percent = lambda percent, total: int(percent * total / 100)
 
@@ -64,18 +64,20 @@ class Tui(App):
         self.input_box.value = ""
         self.input_box.refresh()
 
-    async def perform_attach_house(self, message: Message):
-        house: House = message.data["house"]
+    async def perform_add_house(self, message: Message):
+        house = message.data["house"]
         await self.house_tree.add_house(house.name)
-        for room in house.rooms:
+
+        for room, icon in house.room_icons:
             await self.house_tree.add_room(house.name, room)
+            self.house_tree.change_data_child(house.name, room, "icon", icon)
 
         for name, rank in house.ranks.items():
             await self.member_lists[house.name].add_rank(name)
             self.member_lists[house.name].change_data_parent(name, "color", rank.color)
             self.member_lists[house.name].change_data_parent(name, "icon", rank.icon)
 
-        for name, rank in house.member_rank.items():
+        for name, rank in house.member_ranks.items():
             await self.member_lists[house.name].add_user_to_rank(rank, name)
 
     async def perform_connection_disable(self, _):
@@ -95,11 +97,15 @@ class Tui(App):
                 easing="none",
             )
 
-    async def perform_add_house(self, message: Message):
-        await self.house_tree.add_house(message.text)
-
     async def perform_add_room(self, message: Message):
         await self.house_tree.add_room(message.house, message.text)
+
+    async def perform_del_chat(self, message: Message):
+        screen = f"{message.house}/{message.room}"
+        self.chat_screen[screen].chats = ""
+        if screen == self.current_screen:
+            await self.chat_scroll.update("")
+            # await self.refresh_screen()
 
     async def perform_del_room(self, message: Message):
         self.house_tree.del_room(message.house, message.room)

@@ -38,13 +38,12 @@ class CustomTree(TreeControl):
     async def add_under_child(self, child: str, name: str, tag: CustomNode) -> None:
         for node in self.root.children:
             if str(node.label) == child:
-                if name not in node.children:
+                if name not in (str(child.label) for child in node.children):
                     await node.add(name, tag)
-                break
+                    break
 
     def del_under_root(self, name: str):
         index = self.get_node_index(self.root, name)
-
         self.root.children.pop(index)
         self.root.tree.children.pop(index)
         self.refresh()
