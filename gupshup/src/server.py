@@ -33,6 +33,12 @@ class Server:
         # TODO: modify `Channel` class so that this sleep is not needed
         sleep(0.1)
 
+    # --------------------------------------------------------
+    # +-------------------------------+
+    # | Methods to manage user data   |
+    # | When sent from `HOME`         |
+    # +-------------------------------+
+
     def action_join(self, message: Message):
         house = message.text[6:]
         if house not in self.houses:
@@ -151,13 +157,14 @@ class Server:
             self.users[message.sender].del_chat(param)
             return []
 
+    # ----------------------- END OF HOME FUNCTIONS ---------------------------------
+
     def handle_user_message(self, message: Message) -> List[Message]:
         text = message.text
         if message.room == "general" and text[0] in "/":
             try:
                 action, _ = text[1:].split(" ", 1)
                 cmd = f"self.action_{action}(message)"
-                print(cmd)
                 return eval(cmd)
 
             except AttributeError:
@@ -182,7 +189,9 @@ class Server:
 
                 self.users[message.room].add_chat(message.sender)
                 return [
-                    message.convert(room=message.sender, reciepents=[message.room]),
+                    message.convert(
+                        sender="self", room=message.sender, reciepents=[message.room]
+                    ),
                     message.convert(sender="self"),
                 ]
 

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Any
 from copy import deepcopy
 
 
@@ -11,7 +11,7 @@ class Message:
         text: str = "",
         action: str = "",
         reciepents: List[str] = [],
-        data: dict[str, str] = {},
+        data: dict[str, Any] = {},
     ):
         self.action = action
         self.sender = sender
