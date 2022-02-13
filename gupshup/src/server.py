@@ -36,17 +36,18 @@ class Server:
 
     # +-------------------------------+
     # | Methods to manage user data   |
-    # | When sent from `HOME`         |
+    # | When sent from `HOME/general` |
     # +-------------------------------+
 
-    def action_join(self, message: Message):
+    # SYNTAX : general_<action>
+    def general_join(self, message: Message):
         house = message.text[6:]
         if house not in self.houses:
             return [message.convert(text="No such house")]
 
         return self.houses[house].process_message(message)
 
-    def action_add_room(self, message) -> List[Message]:
+    def general_add_room(self, message) -> List[Message]:
         param = message.text[10:].strip()
 
         if param == message.sender:
@@ -79,7 +80,7 @@ class Server:
                     ),
                 ]
 
-    def action_add_house(self, message):
+    def general_add_house(self, message):
         param = message.text[11:]
         if param in self.houses:
             return [
@@ -97,7 +98,7 @@ class Server:
                 )
             ]
 
-    def action_ban(self, message):
+    def general_ban(self, message):
         param = message.text[5:]
         if param not in self.users:
             return [
@@ -113,36 +114,41 @@ class Server:
                 )
             ]
 
-    def action_silent(self, message: Message) -> List[Message]:
-        param = message.text[8:]
-        if param not in self.users:
-            return [
-                message.convert(
-                    text="No user with such name!",
-                ),
-            ]
-        else:
-            self.users[message.sender].silent_user(param)
-            return [
-                message.convert(
-                    text=f"messages from `{param}` won't have a notification ring now",
-                )
-            ]
+    def general_toggle_silent(self, message: Message) -> List[Message]:
+        return [message.convert(action="toggle_silent")]
+
+    def general_del_chat(self, message: Message) -> List[Message]:
+        return [message.convert(action="del_chat")]
+
+    # ----------------------- END OF HOME/general FUNCTIONS ---------------------------------
+
+    # +--------------------------------+
+    # | Methods to manage user data    |
+    # | When sent from `HOME/!general` |
+    # +--------------------------------+
+
+    def action_ban(self, message: Message) -> List[Message]:
+        self.users[message.sender].ban_user(message.room)
+        return []
+
+    def action_toggle_silent(self, message: Message) -> List[Message]:
+        return [message.convert(action="toggle_silent")]
 
     def action_del_chat(self, message: Message) -> List[Message]:
-        if message.room == "general":
-            return [message.convert(action="del_chat")]
+        return [message.convert(action="del_chat")]
 
+    def action_del_room(self, message: Message) -> List[Message]:
         return [message.convert(action="del_room")]
 
-    # ----------------------- END OF HOME FUNCTIONS ---------------------------------
+    # ----------------------- END OF HOME/!general FUNCTIONS ---------------------------------
 
     def handle_user_message(self, message: Message) -> List[Message]:
         text = message.text
         if message.room == "general" and text[0] in "/":
             try:
                 action, *_ = text[1:].split(" ", 1)
-                cmd = f"self.action_{action}(message)"
+                cmd = f"self.general_{action}(message)"
+                print(cmd)
                 return eval(cmd)
 
             except AttributeError:
@@ -162,7 +168,21 @@ class Server:
             if message.room == "general":
                 return [message.convert(sender="self")]
             else:
-                if self.users[message.room].has_banned(message.sender):
+                if message.text[0] == "/":
+                    try:
+                        action, *_ = text[1:].split(" ", 1)
+                        cmd = f"self.action_{action}(message)"
+                        print(cmd)
+                        return eval(cmd)
+
+                    except AttributeError:
+                        return [
+                            message.convert(
+                                text="[red]No such command! See help menu by pressing ctrl-h[/red]",
+                            )
+                        ]
+
+                elif self.users[message.room].has_banned(message.sender):
                     return [message.convert(sender="self")]
 
                 self.users[message.room].add_chat(message.sender)
