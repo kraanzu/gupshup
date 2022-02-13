@@ -11,6 +11,9 @@ class User:
         self.home = House("HOME", self.username)
         self.houses = set()
 
+    def close(self):
+        self.channel.conn.close()
+
     def send(self, message: Message):
         self.channel.send(message)
 

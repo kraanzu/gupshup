@@ -1,4 +1,5 @@
 import os
+from pickle import load
 from queue import Queue
 from textual import events
 from sys import argv
@@ -27,14 +28,11 @@ class Tui(App):
         self.user = argv[1]
         self.queue = Queue()
         self.client = Client(self.user, self.queue)
-        self.client.start_connection()
         self.current_house = "HOME"
         self.current_room = "general"
         self.current_screen = f"{self.current_house}/{self.current_room}"
 
         self.member_lists: dict[str, MemberList] = defaultdict(MemberList)
-
-        self.set_interval(0.2, self.server_listen)
 
         await self.bind("ctrl+b", "view.toggle('house_tree')", "toggle house tree")
         await self.bind("ctrl+q", "quit", "Quit")
@@ -64,13 +62,18 @@ class Tui(App):
         self.input_box.value = ""
         self.input_box.refresh()
 
-    async def perform_add_house(self, message: Message):
+    async def perform_add_house(
+        self,
+        message: Message,
+    ):
         house = message.data["house"]
         await self.house_tree.add_house(house.name)
 
         for room in house.rooms:
             await self.house_tree.add_room(house.name, room)
-            self.house_tree.change_data_child(house.name, room, "icon", house.room_icons.get(room , ""))
+            self.house_tree.change_data_child(
+                house.name, room, "icon", house.room_icons.get(room, "")
+            )
 
         for name, rank in house.ranks.items():
             await self.member_lists[house.name].add_rank(name)
@@ -80,26 +83,30 @@ class Tui(App):
         for name, rank in house.member_ranks.items():
             await self.member_lists[house.name].add_user_to_rank(rank, name)
 
-    async def perform_connection_disable(self, _):
+    async def perform_connection_disable(self):
         self.headbar.status = "ﮡ Can't connect"
 
-    async def perform_connection_enable(self, _):
+    async def perform_connection_enable(self):
         self.headbar.status = " Online"
 
-    async def perform_push_text(self, message: Message):
+    async def perform_push_text(self, message: Message, local=False):
         screen = f"{message.house}/{message.room}"
         self.chat_screen[screen].push_text(message)
-        if self.current_screen == screen:
-            await self.chat_scroll.update(self.chat_screen[screen].chats, home=False)
-            self.chat_scroll.animate(
-                "y",
-                self.chat_scroll.max_scroll_y + self.chat_scroll.y,
-                easing="none",
-            )
-        else:
-            if not self.house_tree.is_room_silent(message.house, message.room):
-                self.console.bell()
-            self.house_tree.increase_pending(message.house, message.room)
+
+        if not local:
+            if self.current_screen == screen:
+                await self.chat_scroll.update(
+                    self.chat_screen[screen].chats, home=False
+                )
+                self.chat_scroll.animate(
+                    "y",
+                    self.chat_scroll.max_scroll_y + self.chat_scroll.y,
+                    easing="none",
+                )
+            else:
+                if not self.house_tree.is_room_silent(message.house, message.room):
+                    self.console.bell()
+                self.house_tree.increase_pending(message.house, message.room)
 
     async def perform_add_room(self, message: Message):
         await self.house_tree.add_room(message.house, message.text)
@@ -188,11 +195,27 @@ class Tui(App):
             75, y
         )
 
-        self.set_interval(0.8, self.server_listen)
+        await self.populate_local_data()
         await self.refresh_screen()
+
+    async def populate_local_data(self):
+        for message in self.client.chats:
+            if message.action in ["connection_enable", "connection_disable"]:
+                continue
+            if message.action == "push_text":
+                await self.perform_push_text(message, local=True)
+            else:
+                await eval(f"self.perform_{message.action}(message)")
+
+        self.client.start_connection()
+        self.set_interval(0.2, self.server_listen)
 
     async def on_resize(self, _: events.Resize) -> None:
         await self.refresh_screen()
+
+    async def action_quit(self):
+        self.client.save_chats()
+        await super().action_quit()
 
     async def _clear_screen(self):
         # clears all the widgets from the screen..and re render them all

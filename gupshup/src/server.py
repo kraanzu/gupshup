@@ -22,13 +22,17 @@ class Server:
         self.users: Dict[str, User] = dict()
 
         try:
+            os.mkdir(os.path.join(HOME, ".gupshup"))
+        except:
+            pass
+
+        try:
             with open(SERVER_DATA, "rb") as f:
                 self.houses, self.user_messages = load(f)
 
-        except FileNotFoundError:
+        except:
             self.houses: Dict[str, House] = dict()
-            self.user_messages: Dict[str, List[Message]] = defaultdict(list)
-            os.mkdir(os.path.join(HOME, ".gupshup"))
+            self.user_messages: Dict[str, List[Message]] = dict()
             self.save_data()
 
     def broadcast(
@@ -52,7 +56,9 @@ class Server:
                 pass
             finally:
                 if not from_server:
-                    self.user_messages[user].append(message)
+                    self.user_messages[user] = self.user_messages.get(user, []) + [
+                        message
+                    ]
 
         # TODO: modify `Channel` class so that this sleep is not needed
         sleep(0.1)
@@ -216,10 +222,10 @@ class Server:
                     message.convert(sender="self"),
                 ]
 
-    def serve_user(self, user: str):
-
-        for message in self.user_messages[user]:
-            self.broadcast(message, [user], True)
+    def serve_user(self, user: str, start: int):
+        if start != -1:
+            for message in self.user_messages.get(user, [])[start:]:
+                self.broadcast(message, [user], True)
 
         while True:
             try:
@@ -249,22 +255,27 @@ class Server:
         while True:
             try:
                 conn, _ = self.server.accept()
-                username = conn.recv(1024).decode()
-
+                username = conn.recv(512).decode()
                 if username not in self.users:
-                    self.users[username] = User(username, conn)
                     self.houses[username] = House(username, username)
                     print(f"{username} joined")
                 else:
+                    self.users[username].close()
                     print(f"{username} reconnected")
 
-                Thread(target=self.serve_user, args=(username,), daemon=True).start()
+                offline_load = int(conn.recv(512).decode())
+
+                self.users[username] = User(username, conn)
+                Thread(
+                    target=self.serve_user, args=(username, offline_load), daemon=True
+                ).start()
 
             except KeyboardInterrupt:
                 print("SERVER SHUT DOWN")
                 break
 
-            except:
+            except Exception as e:
+                print(e)
                 break
 
         self.save_data()
