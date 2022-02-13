@@ -30,14 +30,22 @@ class Client:
                 self.queue.put(Message(action="connection_disable"))
                 while not self.try_reconnect():
                     pass
+
                 self.queue.put(Message(action="connection_enable"))
 
     def try_reconnect(self):
         try:
             self.conn.connect((HOST, PORT))
-            self.conn.sendall(b"")
+            self.conn.sendall(self.name.encode())
+            self.channel = Channel(self.conn)
             return True
-        except:
+
+        except ConnectionRefusedError:
+            return False
+
+        except OSError:
+            self.conn.close()
+            self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             return False
 
     def start_connection(self):

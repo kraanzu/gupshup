@@ -230,13 +230,25 @@ class Server:
         self.server.listen()
         print("[+]", "server is up and running")
         while True:
-            conn, _ = self.server.accept()
-            username = conn.recv(1024).decode()
+            try:
+                conn, _ = self.server.accept()
+                username = conn.recv(1024).decode()
 
-            self.users[username] = User(username, conn)
-            self.houses[username] = House(username, username)
-            print(f"{username} joined")
-            Thread(target=self.serve_user, args=(username,), daemon=True).start()
+                if username not in self.users:
+                    self.users[username] = User(username, conn)
+                    self.houses[username] = House(username, username)
+                    print(f"{username} joined")
+                else:
+                    print(f"{username} reconnected")
+
+                Thread(target=self.serve_user, args=(username,), daemon=True).start()
+
+            except KeyboardInterrupt:
+                print("SERVER SHUT DOWN")
+
+            finally:
+                self.server.close()
+                break
 
 
 if __name__ == "__main__":

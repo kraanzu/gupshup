@@ -141,9 +141,13 @@ class House:
 
     def action_kick(self, message: Message) -> List[Message]:
         member = message.text[6:].strip()
+
+        if not member:
+            raise ValueError
+
         if member not in self.members:
             return [message.convert(text="user not in the house")]
-        self.remove_member(member)
+
         x = [
             message.convert(
                 text=f"User {member} was kicked out of the house",
@@ -155,9 +159,11 @@ class House:
                 reciepents=list(self.members),
                 data={"rank": self.member_rank[member], "user": member},
             ),
-            message.convert(house="HOME", room="general", text=kick_message(self.name)),
         ]
+
+        self.remove_member(member)
         del self.member_rank[member]
+        self.members.remove(member)
         return x
 
     def action_toggle_type(self, message: Message) -> List[Message]:
