@@ -1,3 +1,4 @@
+from collections import defaultdict
 import socket
 from time import sleep
 from threading import Thread
@@ -16,20 +17,30 @@ class Server:
 
         self.users: Dict[str, User] = dict()
         self.houses: Dict[str, House] = dict()
+        self.user_messages: Dict[str, List[Message]] = defaultdict(list)
 
-    def broadcast(self, message: Message, reciepents: List[str]):
-        if message.house != "HOME" and message.sender != "SERVER":
-            house = self.houses[message.house]
-            color = house.ranks[house.member_rank[message.sender]].color
-        elif message.sender == "SERVER":
-            color = "red"
-        else:
-            color = "magenta"
+    def broadcast(
+        self, message: Message, reciepents: List[str], from_server: bool = False
+    ):
+        if not from_server:
+            if message.house != "HOME" and message.sender != "SERVER":
+                house = self.houses[message.house]
+                color = house.ranks[house.member_rank[message.sender]].color
+            elif message.sender == "SERVER":
+                color = "red"
+            else:
+                color = "magenta"
 
-        message.sender = f"[{color}]{message.sender}[/{color}]"
+            message.sender = f"[{color}]{message.sender}[/{color}]"
 
         for user in reciepents:
-            self.users[user].send(message)
+            try:
+                self.users[user].send(message)
+            except:
+                pass
+            finally:
+                if not from_server:
+                    self.user_messages[user].append(message)
 
         # TODO: modify `Channel` class so that this sleep is not needed
         sleep(0.1)
@@ -194,6 +205,9 @@ class Server:
                 ]
 
     def serve_user(self, user: str):
+        for message in self.user_messages[user]:
+            self.broadcast(message, [user], True)
+
         while True:
             try:
                 message = self.users[user].recv()

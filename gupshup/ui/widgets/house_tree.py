@@ -49,19 +49,19 @@ class HouseTree(CustomTree):
         if is_hover:
             label.stylize("bold red" if node.data.type == "house_root" else "magenta")
 
-        icon = node.data.icon
-        icon_label = Text(f"{icon} ", no_wrap=True, overflow="ellipsis") + label
-
-        if node.data.silent:
-            icon_label += Text(" ﱝ", no_wrap=True, overflow="ellipsis")
+        icon_label = (
+            Text(
+                f"{'ﱝ ' if node.data.silent else ' '}" + f"{node.data.icon} ",
+                no_wrap=True,
+                overflow="ellipsis",
+            )
+            + label
+        )
 
         if node.data.pending != "0":
-            icon_label += Text(
-                f" ({node.data.pending})", no_wrap=True, overflow="ellipsis"
-            )
+            icon_label += f"({node.data.pending})"
 
         icon_label.apply_meta(meta)
-
         return icon_label
 
     async def expand_home(self):

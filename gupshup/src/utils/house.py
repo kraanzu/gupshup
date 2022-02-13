@@ -43,7 +43,7 @@ class House:
         self.required_power: Dict[str, float] = defaultdict(lambda: float("inf"))
 
     def _is_allowed(self, action: str, user: str) -> bool:
-        return self.power_levels[self.member_rank[user]] >= self.required_power[action]
+        return self.ranks[self.member_rank[user]].power >= self.required_power[action]
 
     def add_to_waiting_list(self, user: str):
         self.waiting_users.add(user)
@@ -165,6 +165,7 @@ class House:
         x = []
         for user in self.waiting_users:
             x.extend(self.add_member(user))
+
         self.waiting_users = set()
 
         return x + [
@@ -222,6 +223,7 @@ class House:
                 ),
             ]
 
+        self.waiting_users.remove(user)
         return self.add_member(user)
 
     def action_ban_user(self, message: Message) -> List[Message]:
@@ -371,10 +373,10 @@ class House:
     def action_change_rank_power(self, message: Message) -> List[Message]:
         param = message.text[19:].strip()
         rank, power = param.split(" ", 1)
+        self.ranks[rank].power = int(power)
         return [
             message.convert(
-                action="change_rank_power",
-                data={"rank": rank, "power": power},
+                text=f"rank {rank}'s power was set to {power}' by {message.sender}",
                 reciepents=list(self.members),
             )
         ]
@@ -396,6 +398,17 @@ class House:
             message.convert(
                 action="change_room_icon",
                 text=name,
+                reciepents=list(self.members),
+            )
+        ]
+
+    def action_change_command_power(self, message: Message) -> List[Message]:
+        param = message.text[21:].strip()
+        command, power = param.split(" ", 1)
+        self.required_power[command] = int(power)
+        return [
+            message.convert(
+                text=f"command {command}'s power level was set to {power} by {message.sender}'",
                 reciepents=list(self.members),
             )
         ]
@@ -431,9 +444,12 @@ class House:
     def process_special_message(self, message: Message) -> List[Message]:
         action, *_ = message.text[1:].split(" ", 1)
 
-        if action not in ["del_chat", "join", "bye"] and not self._is_allowed(
-            action, message.sender
-        ):
+        if action not in [
+            "del_chat",
+            "toggle_silent",
+            "join",
+            "bye",
+        ] and not self._is_allowed(action, message.sender):
             return [
                 message.convert(
                     text="Your current power level doesn't allow this action",

@@ -141,11 +141,6 @@ class Tui(App):
             message.data["rank"], "color", message.data["color"]
         )
 
-    async def perform_change_rank_power(self, message: Message):
-        await self.member_lists[message.house].change_rank_data(
-            message.data["rank"], "power", message.data["power"]
-        )
-
     async def perform_change_rank_name(self, message: Message):
         await self.member_lists[message.house].change_rank_name(
             message.data["rank"], message.data["name"]
