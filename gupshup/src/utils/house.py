@@ -27,7 +27,7 @@ class House:
         self.name = name
         self.king = king
         self.rooms = {"general"}
-        self.room_icons = defaultdict(lambda: "ﴘ")
+        self.room_icons = dict()
         self.members = set([king])
         self.banned_users = set()
         self.muted_users = set()
@@ -38,12 +38,13 @@ class House:
             "king": Rank("king", "red", float("inf"), icon=""),
             "pawn": Rank("pawn", icon=""),
         }
-        self.power_levels: Dict[str, float] = defaultdict(int)
-        self.power_levels["king"] = float("inf")
-        self.required_power: Dict[str, float] = defaultdict(lambda: float("inf"))
+        self.room_icons["general"] = "ﴘ"
+        self.required_power: Dict[str, float] = dict()
 
     def _is_allowed(self, action: str, user: str) -> bool:
-        return self.ranks[self.member_rank[user]].power >= self.required_power[action]
+        return self.ranks[self.member_rank[user]].power >= self.required_power.get(
+            action, float("inf")
+        )
 
     def add_to_waiting_list(self, user: str):
         self.waiting_users.add(user)

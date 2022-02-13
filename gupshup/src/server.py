@@ -1,5 +1,7 @@
-from collections import defaultdict
 import socket
+import os
+from collections import defaultdict
+from pickle import dump, load
 from time import sleep
 from threading import Thread
 from typing import Dict, List
@@ -8,16 +10,26 @@ from .utils import Message, House, User
 HOST = "localhost"
 PORT = 5500
 
+HOME = os.path.expanduser("~")
+SERVER_DATA = os.path.join(HOME, ".gupshup", "server_data")
+
 
 class Server:
     def __init__(self):
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server.bind((HOST, PORT))
-
         self.users: Dict[str, User] = dict()
-        self.houses: Dict[str, House] = dict()
-        self.user_messages: Dict[str, List[Message]] = defaultdict(list)
+
+        try:
+            with open(SERVER_DATA, "rb") as f:
+                self.houses, self.user_messages = load(f)
+
+        except FileNotFoundError:
+            self.houses: Dict[str, House] = dict()
+            self.user_messages: Dict[str, List[Message]] = defaultdict(list)
+            os.mkdir(os.path.join(HOME, ".gupshup"))
+            self.save_data()
 
     def broadcast(
         self, message: Message, reciepents: List[str], from_server: bool = False
@@ -205,6 +217,7 @@ class Server:
                 ]
 
     def serve_user(self, user: str):
+
         for message in self.user_messages[user]:
             self.broadcast(message, [user], True)
 
@@ -222,9 +235,13 @@ class Server:
                         recipients = message.take_recipients()
                         self.broadcast(message, recipients)
 
-            except Exception as e:
-                print(e)
+            except:
+                print(f"{user} disconnected")
                 return
+
+    def save_data(self):
+        with open(SERVER_DATA, "wb") as f:
+            dump((self.houses, self.user_messages), f)
 
     def start_connection(self):
         self.server.listen()
@@ -245,10 +262,13 @@ class Server:
 
             except KeyboardInterrupt:
                 print("SERVER SHUT DOWN")
-
-            finally:
-                self.server.close()
                 break
+
+            except:
+                break
+
+        self.save_data()
+        self.server.close()
 
 
 if __name__ == "__main__":

@@ -70,9 +70,7 @@ class Tui(App):
 
         for room in house.rooms:
             await self.house_tree.add_room(house.name, room)
-
-        for room, icon in house.room_icons:
-            self.house_tree.change_data_child(house.name, room, "icon", icon)
+            self.house_tree.change_data_child(house.name, room, "icon", house.room_icons.get(room , ""))
 
         for name, rank in house.ranks.items():
             await self.member_lists[house.name].add_rank(name)
