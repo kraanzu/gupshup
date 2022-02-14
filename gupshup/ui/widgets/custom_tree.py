@@ -28,7 +28,7 @@ class CustomTree(TreeControl):
             node.tree.guide_style = (
                 "bold not dim red" if node.id == hover_node else "black"
             )
-        self.refresh(layout=False)
+        self.refresh(layout=True)
 
     def get_node_index(self, parent: TreeNode, name: str) -> int:
         for index, node in enumerate(parent.children):

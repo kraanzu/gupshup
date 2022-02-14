@@ -195,6 +195,8 @@ class Tui(App):
         )
 
         self.house_tree_scroll = ScrollView(self.house_tree)
+        self.member_list_scroll = ScrollView(self.member_lists[self.current_house])
+
         await self.populate_local_data()
         await self.refresh_screen()
 
@@ -245,7 +247,7 @@ class Tui(App):
         # RIGHT WIDGETS
         if self.current_house != "HOME":
             await self.view.dock(
-                self.member_lists[self.current_house],
+                self.member_list_scroll,
                 edge="right",
                 size=int(0.15 * x),
                 name="member_list",
@@ -280,8 +282,12 @@ class Tui(App):
 
     async def update_chat_screen(self, house: str, room: str):
         # TODO: Make this reactive
+
         if self.current_house == house and self.current_room == room:
             return
+
+        if self.current_house != house:
+            self.member_list_scroll = ScrollView(self.member_lists[house])
 
         self.current_house = house
         self.current_room = room
@@ -306,16 +312,12 @@ class Tui(App):
                         house,
                         room,
                     )
-            case "house":
+            case "house" | "rank":
                 if node.expanded:
                     await node.toggle()
                 else:
                     await node.expand()
                 self.refresh(layout=True)
-
-            # FOR MEMEBER LISTS
-            case "rank":
-                await node.toggle()
 
             case "member":
                 name = str(node.label)
