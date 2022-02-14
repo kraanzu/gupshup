@@ -1,5 +1,4 @@
 import os
-from pickle import load
 from queue import Queue
 from textual import events
 from sys import argv
@@ -66,7 +65,7 @@ class Tui(App):
         self,
         message: Message,
     ):
-        house = message.data["house"]
+        house: HouseData = message.data["house"]
         await self.house_tree.add_house(house.name)
 
         for room in house.rooms:
@@ -195,6 +194,7 @@ class Tui(App):
             75, y
         )
 
+        self.house_tree_scroll = ScrollView(self.house_tree)
         await self.populate_local_data()
         await self.refresh_screen()
 
@@ -255,10 +255,11 @@ class Tui(App):
             )
 
         # LEFT WIDGETS
+        self.dam = False
         await self.view.dock(
-            self.house_tree,
+            self.house_tree_scroll,
             edge="left",
-            size=percent(15, x),
+            size=percent(20, x),
             name="house_tree",
         )
         await self.view.dock(Static(self.lseperator), edge="left", size=1, name="ls")
@@ -275,6 +276,7 @@ class Tui(App):
             name="chat_screen",
         )
         await self.view.dock(self.input_box, size=percent(10, y), name="input_box")
+        self.refresh(layout=True)
 
     async def update_chat_screen(self, house: str, room: str):
         # TODO: Make this reactive
@@ -292,6 +294,8 @@ class Tui(App):
         await self.refresh_screen()
 
     async def handle_tree_click(self, click: TreeClick):
+        if self.dam:
+            return
         node = click.node
         match node.data.type:
             case "room":
@@ -303,7 +307,11 @@ class Tui(App):
                         room,
                     )
             case "house":
-                await node.toggle()
+                if node.expanded:
+                    await node.toggle()
+                else:
+                    await node.expand()
+                self.refresh(layout=True)
 
             # FOR MEMEBER LISTS
             case "rank":

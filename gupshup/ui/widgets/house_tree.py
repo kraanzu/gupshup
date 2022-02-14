@@ -79,7 +79,7 @@ class HouseTree(CustomTree):
     async def add_house(self, name: str) -> None:
         await super().add_under_root(name, CustomNode(type="house", icon="ﳐ"))
         await self.add_room(name, "general")
-        self.refresh()
+        self.refresh(layout=True)
 
     async def add_room(self, house: str, name: str) -> None:
         await self.add_under_child(house, name, CustomNode(type="room", icon="ﴘ"))
