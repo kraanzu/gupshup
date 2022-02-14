@@ -15,12 +15,17 @@ SERVER_DATA = os.path.join(HOME, ".gupshup", "server_data")
 
 
 class Server:
-    def __init__(self):
+    """
+    A server class for processing the server work
+    """
+
+    def __init__(self) -> None:
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server.bind((HOST, PORT))
         self.users: Dict[str, User] = dict()
 
+        # READS THE OFFLINE DATA PRESENT
         try:
             os.mkdir(os.path.join(HOME, ".gupshup"))
         except:
@@ -29,7 +34,6 @@ class Server:
         try:
             with open(SERVER_DATA, "rb") as f:
                 self.houses, self.user_messages = load(f)
-
         except:
             self.houses: Dict[str, House] = dict()
             self.user_messages: Dict[str, List[Message]] = dict()
@@ -37,7 +41,11 @@ class Server:
 
     def broadcast(
         self, message: Message, reciepents: List[str], from_server: bool = False
-    ):
+    ) -> None:
+        """
+        Broadcasts the user message to the respective location
+        """
+
         if not from_server:
             if message.house != "HOME" and message.sender != "SERVER":
                 house = self.houses[message.house]
@@ -50,6 +58,7 @@ class Server:
             message.sender = f"[{color}]{message.sender}[/{color}]"
 
         for user in reciepents:
+            # Send the data if possible and finally save it in DB for later sending
             try:
                 self.users[user].send(message)
             except:
@@ -69,7 +78,11 @@ class Server:
     # +-------------------------------+
 
     # SYNTAX : general_<action>
-    def general_join(self, message: Message):
+    def general_join(self, message: Message) -> List[Message]:
+        """
+        Join a house
+        """
+
         house = message.text[6:]
         if house not in self.houses:
             return [message.convert(text="No such house")]
@@ -77,6 +90,10 @@ class Server:
         return self.houses[house].process_message(message)
 
     def general_add_room(self, message) -> List[Message]:
+        """
+        Add a user to chat with
+        """
+
         param = message.text[10:].strip()
 
         if param == message.sender:
@@ -109,7 +126,11 @@ class Server:
                     ),
                 ]
 
-    def general_add_house(self, message):
+    def general_add_house(self, message) -> List[Message]:
+        """
+        Create your brand new house
+        """
+
         param = message.text[11:]
         if param in self.houses:
             return [
@@ -127,7 +148,11 @@ class Server:
                 )
             ]
 
-    def general_ban(self, message):
+    def general_ban(self, message) -> List[Message]:
+        """
+        ban/block a user from texting you
+        """
+
         param = message.text[5:]
         if param not in self.users:
             return [
@@ -144,9 +169,17 @@ class Server:
             ]
 
     def general_toggle_silent(self, message: Message) -> List[Message]:
+        """
+        Toggle silent for a direct conversation
+        """
+
         return [message.convert(action="toggle_silent")]
 
     def general_del_chat(self, message: Message) -> List[Message]:
+        """
+        Del the chat with the user
+        """
+
         return [message.convert(action="del_chat")]
 
     # ----------------------- END OF HOME/general FUNCTIONS ---------------------------------
@@ -157,21 +190,42 @@ class Server:
     # +--------------------------------+
 
     def action_ban(self, message: Message) -> List[Message]:
+        """
+        Ban the current user
+        """
+        # NOTE: the other ban provides the functionality to ban a user before he can message you
+        # this ban just has the convinience to ban the user just by writing /ban in the chat
+
         self.users[message.sender].ban_user(message.room)
         return []
 
     def action_toggle_silent(self, message: Message) -> List[Message]:
+        """
+        Toggle silent for the user
+        """
+        # Why again? see line `196`
         return [message.convert(action="toggle_silent")]
 
     def action_del_chat(self, message: Message) -> List[Message]:
+        """
+        Delete chat with the user
+        """
         return [message.convert(action="del_chat")]
 
     def action_del_room(self, message: Message) -> List[Message]:
+        """
+        Delete the chat along with the room
+        """
+        # TODO: rename del_chat to clear_chat
         return [message.convert(action="del_room")]
 
     # ----------------------- END OF HOME/!general FUNCTIONS ---------------------------------
 
     def handle_user_message(self, message: Message) -> List[Message]:
+        """
+        Handles non-special messages from a user
+        """
+
         text = message.text
         if message.room == "general" and text[0] in "/":
             try:
@@ -222,7 +276,7 @@ class Server:
                     message.convert(sender="self"),
                 ]
 
-    def serve_user(self, user: str, start: int):
+    def serve_user(self, user: str, start: int) -> None:
         if start != -1:
             for message in self.user_messages.get(user, [])[start:]:
                 self.broadcast(message, [user], True)
@@ -249,11 +303,14 @@ class Server:
                 print(f"Some error occured with {user}")
                 return
 
-    def save_data(self):
+    def save_data(self) -> None:
+        """
+        Save the data when closing
+        """
         with open(SERVER_DATA, "wb") as f:
             dump((self.houses, self.user_messages), f)
 
-    def start_connection(self):
+    def start_connection(self) -> None:
         self.server.listen()
         print("[+]", "server is up and running")
         while True:

@@ -6,6 +6,10 @@ from textual.widget import Widget
 
 
 class Banner(Widget):
+    """
+    A Banner widget to show the current house/group
+    """
+
     text = Text("HOME/general", style="bold blue")
 
     def set_text(self, text: str):

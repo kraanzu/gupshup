@@ -16,14 +16,18 @@ CHAT_DATA = os.path.join(GUPSHUP_FOLDER, argv[1])
 
 
 class Client:
-    def __init__(self, name: str, message_queue: Queue = Queue()):
+    def __init__(self, name: str, message_queue: Queue = Queue()) -> None:
         self.name = argv[1]
         self.queue = message_queue
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.online = True
         self.setup_db()
 
-    def setup_db(self):
+    def setup_db(self) -> None:
+        """
+        Reads if an offline data is present,
+        if yes, then loads the offline data
+        """
 
         try:
             os.mkdir(GUPSHUP_FOLDER)
@@ -40,17 +44,23 @@ class Client:
 
         self.start = len(self.chats)
 
-    def save_chats(self):
+    def save_chats(self) -> None:
+        """
+        Save the chats before closing the application
+        """
         with open(CHAT_DATA, "wb") as f:
             dump(self.chats, f)
 
-    def send(self, message: Message):
+    def send(self, message: Message) -> None:
         try:
             self.channel.send(message)
         except:
             self.try_reconnect()
 
-    def listen_from_server(self):
+    def listen_from_server(self) -> None:
+        """
+        Listens from server and add the messages to a working Queue
+        """
         while 1:
             try:
                 data = self.channel.recv()
@@ -60,10 +70,13 @@ class Client:
                 self.queue.put(Message(action="connection_disable"))
                 while not self.try_reconnect():
                     pass
-
                 self.queue.put(Message(action="connection_enable"))
 
     def try_reconnect(self):
+        """
+        Try reconnect on a connection failure
+        """
+
         try:
             self.conn.connect((HOST, PORT))
             self.conn.sendall(self.name.encode())

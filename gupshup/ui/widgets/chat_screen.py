@@ -4,12 +4,13 @@ from ...src.utils import Message
 
 
 class ChatScreen(Widget):
+    """
+    A screen for providing chats
+    """
+
     def __init__(self, name: str | None = None):
         super().__init__(name)
         self.chats = ""
-
-    def set_current_screen(self, name):
-        self.current_screen = name
 
     def render(self) -> RenderableType:
         return self.chats

@@ -259,7 +259,6 @@ class Tui(App):
             )
 
         # LEFT WIDGETS
-        self.dam = False
         await self.view.dock(
             self.house_tree_scroll,
             edge="left",
@@ -300,8 +299,6 @@ class Tui(App):
         await self.refresh_screen()
 
     async def handle_tree_click(self, click: TreeClick):
-        if self.dam:
-            return
         node = click.node
         match node.data.type:
             case "room":

@@ -5,6 +5,10 @@ from .house import House
 
 
 class User:
+    """
+    A user class to make interaction with user data a bit less messy
+    """
+
     def __init__(self, username: str, conn: socket):
         self.username = username
         self.channel = Channel(conn)

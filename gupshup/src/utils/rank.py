@@ -1,5 +1,11 @@
 class Rank:
-    def __init__(self, name: str, color: str = "white", power: float=0, icon='R') -> None:
+    """
+    A rank class for the ranking
+    """
+
+    def __init__(
+        self, name: str, color: str = "white", power: float = 0, icon="R"
+    ) -> None:
         self.name = name
         self.color = color
         self.power = power

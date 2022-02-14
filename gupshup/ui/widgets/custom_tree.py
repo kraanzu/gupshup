@@ -6,6 +6,10 @@ from ...src.utils import CustomNode
 
 
 class CustomTree(TreeControl):
+    """
+    A Tree Control structure for slight modifications
+    to be inherited by `HouseTree` and `MemberList`
+    """
 
     has_focus = Reactive(False)
 

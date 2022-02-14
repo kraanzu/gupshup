@@ -1,4 +1,3 @@
-from textual.reactive import Reactive
 from textual.widgets import Header
 from textual import events
 from rich.table import Table
@@ -8,6 +7,10 @@ from textual import events
 
 
 class Headbar(Header):
+    """
+    Custom Header for Gupshup showing status for the server and a Welcome message
+    """
+
     def __init__(self):
         super().__init__(tall=False, style="magenta on black")
         self.status = " Online"
