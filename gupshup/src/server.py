@@ -241,8 +241,12 @@ class Server:
                         recipients = message.take_recipients()
                         self.broadcast(message, recipients)
 
-            except:
+            except BrokenPipeError:
                 print(f"{user} disconnected")
+                return
+
+            except:
+                print(f"Some error occured with {user}")
                 return
 
     def save_data(self):

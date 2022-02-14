@@ -17,7 +17,7 @@ from .widgets import (
 )
 
 from ..src import Client
-from ..src.utils import Message, HouseData
+from ..src.utils import Message, HouseData, House
 
 percent = lambda percent, total: int(percent * total / 100)
 
@@ -79,13 +79,13 @@ class Tui(App):
             self.member_lists[house.name].change_data_parent(name, "color", rank.color)
             self.member_lists[house.name].change_data_parent(name, "icon", rank.icon)
 
-        for name, rank in house.member_ranks.items():
+        for name, rank in house.member_rank.items():
             await self.member_lists[house.name].add_user_to_rank(rank, name)
 
-    async def perform_connection_disable(self):
+    async def perform_connection_disable(self, *_):
         self.headbar.status = "ﮡ Can't connect"
 
-    async def perform_connection_enable(self):
+    async def perform_connection_enable(self, *_):
         self.headbar.status = " Online"
 
     async def perform_push_text(self, message: Message, local=False):
@@ -233,6 +233,8 @@ class Tui(App):
             self.chat_screen[self.current_screen].chats, home=False
         )
 
+        self.member_list_scroll = ScrollView(self.member_lists[self.current_house])
+
         self.chat_scroll.animate(
             "y",
             10**5,
@@ -277,6 +279,7 @@ class Tui(App):
             size=percent(75, y),
             name="chat_screen",
         )
+
         await self.view.dock(self.input_box, size=percent(10, y), name="input_box")
         self.refresh(layout=True)
 
@@ -285,9 +288,6 @@ class Tui(App):
 
         if self.current_house == house and self.current_room == room:
             return
-
-        if self.current_house != house:
-            self.member_list_scroll = ScrollView(self.member_lists[house])
 
         self.current_house = house
         self.current_room = room
@@ -313,10 +313,7 @@ class Tui(App):
                         room,
                     )
             case "house" | "rank":
-                if node.expanded:
-                    await node.toggle()
-                else:
-                    await node.expand()
+                await node.toggle()
                 self.refresh(layout=True)
 
             case "member":

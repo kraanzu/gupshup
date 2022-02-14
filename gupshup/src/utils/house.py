@@ -12,13 +12,13 @@ class HouseData:
         rooms: set[str],
         room_icons: dict[str, str],
         ranks: dict[str, Rank],
-        member_ranks: dict[str, str],
+        member_rank: dict[str, str],
     ):
         self.name = name
         self.rooms = rooms
         self.room_icons = dict(room_icons)
         self.ranks = dict(ranks)
-        self.member_ranks = dict(member_ranks)
+        self.member_rank = dict(member_rank)
 
 
 class House:

@@ -19,16 +19,12 @@ class CustomTree(TreeControl):
     def on_blur(self) -> None:
         self.has_focus = False
 
-    async def on_mount(self):
-        await self.root.expand()
-        self.refresh(layout=True)
-
     async def watch_hover_node(self, hover_node: NodeID) -> None:
         for node in self.nodes.values():
             node.tree.guide_style = (
                 "bold not dim red" if node.id == hover_node else "black"
             )
-        self.refresh(layout=True)
+        self.refresh()
 
     def get_node_index(self, parent: TreeNode, name: str) -> int:
         for index, node in enumerate(parent.children):
