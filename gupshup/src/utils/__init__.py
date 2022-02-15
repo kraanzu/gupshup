@@ -1,4 +1,3 @@
-from .parser import Parser
 from .house import House, HouseData
 from .message import Message
 from .channel import Channel
