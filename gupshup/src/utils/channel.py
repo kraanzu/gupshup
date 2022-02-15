@@ -39,3 +39,6 @@ class Channel:
         # ]  # 37 seems to be the size of a packed `int`
         # data = loads(self.conn.recv(bufsize))
         # return data
+
+    def close(self):
+        self.conn.close()

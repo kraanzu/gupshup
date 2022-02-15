@@ -4,7 +4,7 @@ from pickle import dump, load
 from time import sleep
 from threading import Thread
 from typing import Dict, List
-from .utils import Message, House, User
+from .utils import Message, House, User, Channel
 
 HOST = "localhost"
 PORT = 5500
@@ -22,7 +22,7 @@ class Server:
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server.bind((HOST, PORT))
-        self.users: Dict[str, User] = dict()
+        self.users: Dict[str, Channel] = dict()
 
         # READS THE OFFLINE DATA PRESENT
         try:
@@ -32,10 +32,11 @@ class Server:
 
         try:
             with open(SERVER_DATA, "rb") as f:
-                self.houses, self.user_messages = load(f)
+                self.houses, self.user_messages, self.user_db = load(f)
         except:
             self.houses: Dict[str, House] = dict()
             self.user_messages: Dict[str, List[Message]] = dict()
+            self.user_db: Dict[str, User] = dict()
             self.save_data()
 
     def broadcast(
@@ -103,14 +104,14 @@ class Server:
                 )
             ]
 
-        if param not in self.users:
+        elif param not in self.users:
             return [
                 message.convert(
                     text="No user with such name!",
                 ),
             ]
         else:
-            if self.users[param].has_banned(message.sender):
+            if self.user_db[param].has_banned(message.sender):
                 return [
                     message.convert(
                         text="This user has blocked you so you can't connect",
@@ -158,10 +159,10 @@ class Server:
                     text="No user with such name!",
                 ),
             ]
-        elif self.users[message.sender].has_banned(param):
+        elif self.user_db[message.sender].has_banned(param):
             return message.covert(text="this user is already banned")
         else:
-            self.users[message.sender].ban_user(param)
+            self.user_db[message.sender].ban_user(param)
             return [
                 message.convert(
                     text=f"User `{param}` can't send you private texts now",
@@ -174,10 +175,10 @@ class Server:
         """
 
         param = message.text[7:].strip()
-        if not self.users[message.sender].has_banned(param):
+        if not self.user_db[message.sender].has_banned(param):
             return message.covert(text="this user is not banned by you")
         else:
-            self.users[message.sender].unban_user(param)
+            self.user_db[message.sender].unban_user(param)
             return [
                 message.convert(
                     text=f"User `{param}` can send you private texts now",
@@ -212,7 +213,7 @@ class Server:
         # NOTE: the other ban provides the functionality to ban a user before he can message you
         # this ban just has the convinience to ban the user just by writing /ban in the chat
 
-        self.users[message.sender].ban_user(message.room)
+        self.user_db[message.sender].ban_user(message.room)
         return []
 
     def action_toggle_silent(self, message: Message) -> List[Message]:
@@ -280,7 +281,7 @@ class Server:
                             )
                         ]
 
-                elif self.users[message.room].has_banned(message.sender):
+                elif self.user_db[message.room].has_banned(message.sender):
                     return [message.convert(sender="self")]
 
                 return [
@@ -315,7 +316,7 @@ class Server:
                         self.broadcast(message, recipients)
 
             except Exception as e:
-                print(e)
+                print('EXCEPTION: ', e)
                 print(f"{user} disconnected")
                 return
 
@@ -324,7 +325,7 @@ class Server:
         Save the data when closing
         """
         with open(SERVER_DATA, "wb") as f:
-            dump((self.houses, self.user_messages), f)
+            dump((self.houses, self.user_messages, self.user_db), f)
 
     def close_all_connections(self):
 
@@ -342,6 +343,7 @@ class Server:
                 username = conn.recv(512).decode()
                 if username not in self.users:
                     self.houses[username] = House(username, username)
+                    self.user_db[username] = User(username)
                     print(f"{username} joined")
                 else:
                     self.users[username].close()
@@ -349,7 +351,7 @@ class Server:
 
                 offline_load = int(conn.recv(512).decode())
 
-                self.users[username] = User(username, conn)
+                self.users[username] = Channel(conn)
                 Thread(
                     target=self.serve_user, args=(username, offline_load), daemon=True
                 ).start()
