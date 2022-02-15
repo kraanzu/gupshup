@@ -296,7 +296,7 @@ class Tui(App):
         # RIGHT WIDGETS
         if self.current_house != "HOME":
             await self.view.dock(
-                self.member_lists[self.current_house],
+                ScrollView(self.member_lists[self.current_house]),
                 edge="right",
                 size=int(0.15 * x),
                 name="member_list",
