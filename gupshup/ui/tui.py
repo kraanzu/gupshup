@@ -139,6 +139,7 @@ class Tui(App):
 
     async def perform_del_chat(self, message: Message) -> None:
         self.house_tree.del_room(message.house, message.room)
+        self.chat_screen[f"{message.house}/{message.room}"].chats = ""
         await self.update_chat_screen(message.house, "general")
 
     async def perform_clear_chat(self, message: Message) -> None:

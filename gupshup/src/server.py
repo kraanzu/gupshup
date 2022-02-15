@@ -117,7 +117,6 @@ class Server:
                     )
                 ]
             else:
-                self.users[message.sender].add_chat(param)
                 return [
                     message.convert(action="add_room", text=param),
                     message.convert(
@@ -284,8 +283,12 @@ class Server:
                 elif self.users[message.room].has_banned(message.sender):
                     return [message.convert(sender="self")]
 
-                self.users[message.room].add_chat(message.sender)
                 return [
+                    message.convert(
+                        action="add_room",
+                        text=message.sender,
+                        reciepents=[message.room],
+                    ),
                     message.convert(
                         sender="self", room=message.sender, reciepents=[message.room]
                     ),
