@@ -137,7 +137,7 @@ class Tui(App):
     async def perform_add_room(self, message: Message) -> None:
         await self.house_tree.add_room(message.house, message.text)
 
-    async def perform_del_chat(self, message: Message) -> None:
+    async def perform_clear_chat(self, message: Message) -> None:
         screen = f"{message.house}/{message.room}"
         self.chat_screen[screen].chats = ""
         if screen == self.current_screen:

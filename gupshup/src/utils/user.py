@@ -41,8 +41,8 @@ class User:
             self.send(Message(action="add_room", house="HOME", text=user))
             self.home.add_room(user)
 
-    def del_chat(self, name: str):
-        self.send(Message(action="del_chat", house="HOME", text=name))
+    def clear_chat(self, name: str):
+        self.send(Message(action="clear_chat", house="HOME", text=name))
 
     def add_house(self, name: str):
         self.houses.add(name)

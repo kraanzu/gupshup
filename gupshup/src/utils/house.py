@@ -292,8 +292,8 @@ class House:
     def action_destroy(self, message: Message):
         return [message.convert(action="del_house", reciepents=list(self.members))]
 
-    def action_del_chat(self, message: Message):
-        return [message.convert(action="del_chat")]
+    def action_clear_chat(self, message: Message):
+        return [message.convert(action="clear_chat")]
 
     def action_add_rank(self, message: Message):
         rank = message.text[10:].strip()
@@ -479,7 +479,7 @@ class House:
         action, *_ = message.text[1:].split(" ", 1)
 
         if action not in [
-            "del_chat",
+            "clear_chat",
             "toggle_silent",
             "join",
             "bye",

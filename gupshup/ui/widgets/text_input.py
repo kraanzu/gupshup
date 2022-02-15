@@ -109,12 +109,17 @@ class TextInput(Widget):
                 + self.value[self._cursor_position + 1 :]
             )
 
-        elif event.key != "enter":
+        elif len(event.key) == 1:
+            # Q: Why only 1?
+            # A: Apparently, At the time of this writing, there is no difference between ctrl+v and ctrl+V
+            #    Also, there are other keys to keep an eye out for other keys to such as pageDn and others
+            #    Also, the UI hangs on pressing Alt key
+
             self.value = (
                 self.value[: self._cursor_position]
                 + event.key
                 + self.value[self._cursor_position :]
             )
-            self._cursor_position += len(event.key)
+            self._cursor_position += 1
 
         self.refresh()

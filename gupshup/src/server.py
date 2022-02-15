@@ -175,12 +175,12 @@ class Server:
 
         return [message.convert(action="toggle_silent")]
 
-    def general_del_chat(self, message: Message) -> List[Message]:
+    def general_clear_chat(self, message: Message) -> List[Message]:
         """
         Del the chat with the user
         """
 
-        return [message.convert(action="del_chat")]
+        return [message.convert(action="clear_chat")]
 
     # ----------------------- END OF HOME/general FUNCTIONS ---------------------------------
 
@@ -206,17 +206,16 @@ class Server:
         # Why again? see line `196`
         return [message.convert(action="toggle_silent")]
 
-    def action_del_chat(self, message: Message) -> List[Message]:
+    def action_clear_chat(self, message: Message) -> List[Message]:
         """
         Delete chat with the user
         """
-        return [message.convert(action="del_chat")]
+        return [message.convert(action="clear_chat")]
 
     def action_del_room(self, message: Message) -> List[Message]:
         """
         Delete the chat along with the room
         """
-        # TODO: rename del_chat to clear_chat
         return [message.convert(action="del_room")]
 
     # ----------------------- END OF HOME/!general FUNCTIONS ---------------------------------
@@ -295,12 +294,9 @@ class Server:
                         recipients = message.take_recipients()
                         self.broadcast(message, recipients)
 
-            except BrokenPipeError:
+            except Exception as e:
+                print(e)
                 print(f"{user} disconnected")
-                return
-
-            except:
-                print(f"Some error occured with {user}")
                 return
 
     def save_data(self) -> None:
