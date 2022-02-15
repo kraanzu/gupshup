@@ -360,6 +360,7 @@ class Server:
                 break
 
         self.save_data()
+        self.close_all_connections()
 
 
 if __name__ == "__main__":
