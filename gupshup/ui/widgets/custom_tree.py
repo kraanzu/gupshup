@@ -1,7 +1,6 @@
 from rich.text import TextType
-from textual.widgets import NodeID, TreeNode
+from textual.widgets import TreeControl, NodeID, TreeNode, DirectoryTree
 from textual.reactive import Reactive
-from textual.widgets import TreeControl
 from ...src.utils import CustomNode
 
 
@@ -28,7 +27,7 @@ class CustomTree(TreeControl):
             node.tree.guide_style = (
                 "bold not dim red" if node.id == hover_node else "black"
             )
-        self.refresh()
+        self.refresh(layout=True)
 
     def get_node_index(self, parent: TreeNode, name: str) -> int:
         for index, node in enumerate(parent.children):
@@ -38,7 +37,7 @@ class CustomTree(TreeControl):
 
     async def add_under_root(self, name: str, tag: CustomNode) -> None:
         await self.root.add(name, tag)
-        self.refresh(layout=True)
+        # self.refresh(layout=True)
 
     async def add_under_child(self, child: str, name: str, tag: CustomNode) -> None:
         for node in self.root.children:
@@ -46,7 +45,7 @@ class CustomTree(TreeControl):
                 if name not in (str(child.label) for child in node.children):
                     await node.add(name, tag)
                     break
-        self.refresh(layout=True)
+        # self.refresh(layout=True)
 
     def del_under_root(self, name: str):
         index = self.get_node_index(self.root, name)
