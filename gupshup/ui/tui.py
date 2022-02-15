@@ -23,16 +23,27 @@ percent = lambda percent, total: int(percent * total / 100)
 
 
 class Tui(App):
+    """
+    The UI Class for Gupshup
+    """
+
     async def on_load(self, _: events.Load) -> None:
-        self.user = argv[1]
+
+        # INITS
+
+        # client related
         self.queue = Queue()
+        self.user = argv[1]
         self.client = Client(self.user, self.queue)
+
+        # sets up default screen
         self.current_house = "HOME"
         self.current_room = "general"
         self.current_screen = f"{self.current_house}/{self.current_room}"
 
         self.member_lists: dict[str, MemberList] = defaultdict(MemberList)
 
+        # some keybindings
         await self.bind("ctrl+b", "view.toggle('house_tree')", "toggle house tree")
         await self.bind("ctrl+q", "quit", "Quit")
         await self.bind(
@@ -44,6 +55,9 @@ class Tui(App):
             await self.action_send_message()
 
     async def action_send_message(self):
+        """
+        Empties the input box and sends the message to the server
+        """
 
         value = self.input_box.value.strip().strip("\n")
         if not value:
@@ -61,10 +75,20 @@ class Tui(App):
         self.input_box.value = ""
         self.input_box.refresh()
 
+    # +-------------------------------+
+    # | Methods to manage message     |
+    # | when recieved from the server |
+    # +-------------------------------+
+
+    # SYNTAX : perform_<action>(message: Message) -> None
     async def perform_add_house(
         self,
         message: Message,
-    ):
+    ) -> None:
+        """
+        Attaches a house to the tree
+        """
+
         house: HouseData = message.data["house"]
         await self.house_tree.add_house(house.name)
 
@@ -82,17 +106,20 @@ class Tui(App):
         for name, rank in house.member_rank.items():
             await self.member_lists[house.name].add_user_to_rank(rank, name)
 
-    async def perform_connection_disable(self, *_):
+    async def perform_connection_disable(self, *_) -> None:
         self.headbar.status = "ﮡ Can't connect"
 
-    async def perform_connection_enable(self, *_):
+    async def perform_connection_enable(self, *_) -> None:
         self.headbar.status = " Online"
 
-    async def perform_push_text(self, message: Message, local=False):
+    async def perform_push_text(self, message: Message, local=False) -> None:
+        """
+        Performs adding all the text messages to their respective locations
+        """
         screen = f"{message.house}/{message.room}"
         self.chat_screen[screen].push_text(message)
 
-        if not local:
+        if not local:  # check if local/offline data is not being pushed
             if self.current_screen == screen:
                 await self.chat_scroll.update(
                     self.chat_screen[screen].chats, home=False
@@ -107,70 +134,76 @@ class Tui(App):
                     self.console.bell()
                 self.house_tree.increase_pending(message.house, message.room)
 
-    async def perform_add_room(self, message: Message):
+    async def perform_add_room(self, message: Message) -> None:
         await self.house_tree.add_room(message.house, message.text)
 
-    async def perform_del_chat(self, message: Message):
+    async def perform_del_chat(self, message: Message) -> None:
         screen = f"{message.house}/{message.room}"
         self.chat_screen[screen].chats = ""
         if screen == self.current_screen:
             await self.chat_scroll.update("")
-            # await self.refresh_screen()
 
-    async def perform_del_room(self, message: Message):
+    async def perform_del_room(self, message: Message) -> None:
         self.house_tree.del_room(message.house, message.room)
 
-    async def perform_del_house(self, message: Message):
+    async def perform_del_house(self, message: Message) -> None:
         self.house_tree.del_house(message.house)
         await self.update_chat_screen("HOME", "general")
 
-    async def perform_add_rank(self, message: Message):
+    async def perform_add_rank(self, message: Message) -> None:
         await self.member_lists[message.house].add_rank(message.text)
 
-    async def perform_del_rank(self, message: Message):
+    async def perform_del_rank(self, message: Message) -> None:
         await self.member_lists[message.house].del_rank(message.text)
 
-    async def perform_add_user_rank(self, message: Message):
+    async def perform_add_user_rank(self, message: Message) -> None:
         await self.member_lists[message.house].add_user_to_rank(
             message.data["rank"], message.data["user"]
         )
 
-    async def perform_del_user_rank(self, message: Message):
+    async def perform_del_user_rank(self, message: Message) -> None:
         await self.member_lists[message.house].del_from_rank(
             message.data["rank"], message.data["user"]
         )
 
-    async def perform_change_rank_color(self, message: Message):
+    async def perform_change_rank_color(self, message: Message) -> None:
         await self.member_lists[message.house].change_rank_data(
             message.data["rank"], "color", message.data["color"]
         )
 
-    async def perform_change_rank_name(self, message: Message):
+    async def perform_change_rank_name(self, message: Message) -> None:
         await self.member_lists[message.house].change_rank_name(
             message.data["rank"], message.data["name"]
         )
 
-    async def perform_change_rank_icon(self, message: Message):
+    async def perform_change_rank_icon(self, message: Message) -> None:
         await self.member_lists[message.house].change_rank_data(
             message.data["rank"], "icon", message.data["icon"]
         )
 
-    async def perform_change_room_name(self, message: Message):
+    async def perform_change_room_name(self, message: Message) -> None:
         self.house_tree.change_room_name(message.house, message.room, message.text)
 
-    async def perform_change_room_icon(self, message: Message):
+    async def perform_change_room_icon(self, message: Message) -> None:
         self.house_tree.change_room_data(
             message.house, message.room, "icon", message.text
         )
 
-    async def perform_toggle_silent(self, message: Message):
+    async def perform_toggle_silent(self, message: Message) -> None:
         self.house_tree.toggle_silent(message.house, message.room)
 
     async def execute_message(self, message: Message) -> None:
+        """
+        Executes the messages recieved from the server
+        """
+
         cmd = f"self.perform_{message.action}(message)"
         await eval(cmd)
 
     async def server_listen(self) -> None:
+        """
+        Method to continously listen for new messages from the server
+        """
         if self.queue.qsize():
             message = self.queue.get()
             await self.execute_message(message)
@@ -200,10 +233,12 @@ class Tui(App):
         await self.populate_local_data()
         await self.refresh_screen()
 
-    async def populate_local_data(self):
+    async def populate_local_data(self) -> None:
+        """
+        Populates the app with offline data stored in the system
+        """
+
         for message in self.client.chats:
-            if message.action in ["connection_enable", "connection_disable"]:
-                continue
             if message.action == "push_text":
                 await self.perform_push_text(message, local=True)
             else:
@@ -215,11 +250,14 @@ class Tui(App):
     async def on_resize(self, _: events.Resize) -> None:
         await self.refresh_screen()
 
-    async def action_quit(self):
+    async def action_quit(self) -> None:
+        """
+        Clean quit saving the data
+        """
         self.client.save_chats()
         await super().action_quit()
 
-    async def _clear_screen(self):
+    async def _clear_screen(self) -> None:
         # clears all the widgets from the screen..and re render them all
         # Why? you ask? this was the only way at the time of this writing
 
@@ -227,10 +265,18 @@ class Tui(App):
             self.view.layout.docks.clear()
         self.view.widgets.clear()
 
-    async def refresh_screen(self):
+    async def refresh_screen(self) -> None:
+        """
+        Refresh the screen by repainting all the widgets
+        """
+
         await self._clear_screen()
+        x, y = os.get_terminal_size()
+
         await self.chat_scroll.update(
-            self.chat_screen[self.current_screen].chats, home=False
+            self.chat_screen[self.current_screen].chats,
+            home=False
+            # (home = False) so that it doesn't scroll back each and every time when updated
         )
 
         self.member_list_scroll = ScrollView(self.member_lists[self.current_house])
@@ -238,11 +284,12 @@ class Tui(App):
         self.chat_scroll.animate(
             "y",
             10**5,
+            # A large enough value to make sure it really scrolls down to the end
+            # ..will have to probably change this
             easing="none",
             speed=1000,
         )
 
-        x, y = os.get_terminal_size()
         await self.view.dock(self.headbar, name="headbar")
         await self.member_lists[self.current_house].root.expand()
 
@@ -280,9 +327,12 @@ class Tui(App):
         )
 
         await self.view.dock(self.input_box, size=percent(10, y), name="input_box")
-        self.refresh(layout=True)
+        self.refresh(layout=False)  # A little bit too cautious
 
     async def update_chat_screen(self, house: str, room: str):
+        """
+        Update the screen when the chat is changed
+        """
         # TODO: Make this reactive
 
         if self.current_house == house and self.current_room == room:
@@ -298,7 +348,10 @@ class Tui(App):
 
         await self.refresh_screen()
 
-    async def handle_tree_click(self, click: TreeClick):
+    async def handle_tree_click(self, click: TreeClick) -> None:
+        """
+        Handles various clicks
+        """
         node = click.node
         match node.data.type:
             case "room":

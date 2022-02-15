@@ -14,6 +14,10 @@ class HouseData:
         ranks: dict[str, Rank],
         member_rank: dict[str, str],
     ):
+        """
+        A class to be passed through a `Message` class for house-data exchanges
+        """
+
         self.name = name
         self.rooms = rooms
         self.room_icons = dict(room_icons)
@@ -22,6 +26,10 @@ class HouseData:
 
 
 class House:
+    """
+    A house class for maintaining the data about a house
+    """
+
     def __init__(self, name: str, king: str) -> None:
         self.type = "open"
         self.name = name
@@ -42,6 +50,10 @@ class House:
         self.required_power: Dict[str, float] = dict()
 
     def _is_allowed(self, action: str, user: str) -> bool:
+        """
+        Checks if an action is allowed by the user with his current power level
+        """
+
         return self.ranks[self.member_rank[user]].power >= self.required_power.get(
             action, float("inf")
         )
@@ -87,6 +99,7 @@ class House:
             self.name, self.rooms, self.room_icons, self.ranks, self.member_rank
         )
 
+
     def add_member(self, user: str) -> List[Message]:
         self.members.add(user)
         x = [
@@ -112,6 +125,13 @@ class House:
         ]
         self.member_rank[user] = "pawn"
         return x
+
+    # +-------------------------------------------+
+    # | Methods to manage user send special data  |
+    # | sent in the house                         |
+    # +-------------------------------------------+
+
+    # SYNTAX : cation_<action>(message: Message) -> List[Message]
 
     def action_mute(self, message: Message) -> List[Message]:
         user = message.text[6:].strip()
@@ -441,6 +461,9 @@ class House:
         return x
 
     def process_message(self, message: Message) -> List[Message]:
+        """
+        Process the messages sent to the house
+        """
         if message.text[0] == "/":
             return self.process_special_message(message)
         else:
@@ -449,6 +472,10 @@ class House:
             return []
 
     def process_special_message(self, message: Message) -> List[Message]:
+        """
+        Process special messages starting with `/`
+        """
+
         action, *_ = message.text[1:].split(" ", 1)
 
         if action not in [
@@ -468,7 +495,9 @@ class House:
             return eval(cmd)
 
         except AttributeError:
+            # raised when no such funtion is associated with the class ...hence no such command
             return [message.convert(text="[red]No such command[/red]")]
 
         except ValueError:
+            # raised when there is an issue in parsing... hence the command parameters should be incorrect
             return [message.convert(text="[red]invalid use of command![/red]")]

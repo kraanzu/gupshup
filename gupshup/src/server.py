@@ -77,7 +77,7 @@ class Server:
     # | When sent from `HOME/general` |
     # +-------------------------------+
 
-    # SYNTAX : general_<action>
+    # SYNTAX : general_<action>(message: Message) -> List[Message]
     def general_join(self, message: Message) -> List[Message]:
         """
         Join a house
