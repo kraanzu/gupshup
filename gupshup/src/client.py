@@ -81,7 +81,7 @@ class Client:
             self.conn.connect((HOST, PORT))
             self.conn.sendall(self.name.encode())
             self.channel = Channel(self.conn)
-            sleep(0.1)
+            sleep(0.01)
             self.conn.sendall("-1".encode())
             return True
 
@@ -97,7 +97,7 @@ class Client:
         try:
             self.conn.connect((HOST, PORT))
             self.conn.sendall(self.name.encode())
-            sleep(0.1)  # A mild delay for non-mangled recieve
+            sleep(0.01)  # A mild delay for non-mangled recieve
 
             self.conn.sendall(str(self.start).encode())
             self.channel = Channel(self.conn)

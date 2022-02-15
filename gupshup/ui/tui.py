@@ -296,7 +296,7 @@ class Tui(App):
         # RIGHT WIDGETS
         if self.current_house != "HOME":
             await self.view.dock(
-                ScrollView(self.member_lists[self.current_house]),
+                self.member_lists[self.current_house],
                 edge="right",
                 size=int(0.15 * x),
                 name="member_list",
@@ -327,7 +327,7 @@ class Tui(App):
         )
 
         await self.view.dock(self.input_box, size=percent(10, y), name="input_box")
-        self.refresh(layout=False)  # A little bit too cautious
+        self.refresh(layout=True)  # A little bit too cautious
 
     async def update_chat_screen(self, house: str, room: str):
         """

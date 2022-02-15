@@ -184,7 +184,6 @@ class House:
 
         self.remove_member(member)
         del self.member_rank[member]
-        self.members.remove(member)
         return x
 
     def action_toggle_type(self, message: Message) -> List[Message]:

@@ -83,33 +83,35 @@ class TextInput(Widget):
         self._has_focus = False
 
     async def on_key(self, event: events.Key) -> None:
-        if event.key == "left":
-            self._cursor_position = max(self._cursor_position - 1, 0)
 
-        elif event.key == "right":
-            self._cursor_position = min(self._cursor_position + 1, len(self.value))
-
-        elif event.key == "home":
-            self._cursor_position = 0
-
-        elif event.key == "end":
-            self._cursor_position = len(self.value)
-
-        elif event.key == "ctrl+h":  # Backspace
-            if self._cursor_position:
+        match event.key:
+            case "left":
                 self._cursor_position = max(self._cursor_position - 1, 0)
+
+            case "right":
+                self._cursor_position = min(self._cursor_position + 1, len(self.value))
+
+            case "home":
+                self._cursor_position = 0
+
+            case "end":
+                self._cursor_position = len(self.value)
+
+            case "ctrl+h":  # Backspace
+                if self._cursor_position:
+                    self._cursor_position = max(self._cursor_position - 1, 0)
+                    self.value = (
+                        self.value[: self._cursor_position]
+                        + self.value[self._cursor_position + 1 :]
+                    )
+
+            case "delete":
                 self.value = (
                     self.value[: self._cursor_position]
                     + self.value[self._cursor_position + 1 :]
                 )
 
-        elif event.key == "delete":
-            self.value = (
-                self.value[: self._cursor_position]
-                + self.value[self._cursor_position + 1 :]
-            )
-
-        elif len(event.key) == 1:
+        if len(event.key) == 1:
             # Q: Why only 1?
             # A: Apparently, At the time of this writing, there is no difference between ctrl+v and ctrl+V
             #    Also, there are other keys to keep an eye out for other keys to such as pageDn and others

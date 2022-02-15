@@ -70,7 +70,7 @@ class Server:
                     ]
 
         # TODO: modify `Channel` class so that this sleep is not needed
-        sleep(0.1)
+        sleep(0.01)
 
     # +-------------------------------+
     # | Methods to manage user data   |
@@ -306,6 +306,13 @@ class Server:
         with open(SERVER_DATA, "wb") as f:
             dump((self.houses, self.user_messages), f)
 
+    def close_all_connections(self):
+
+        for conn in self.users.values():
+            conn.close()
+
+        self.server.close()
+
     def start_connection(self) -> None:
         self.server.listen()
         print("[+]", "server is up and running")
@@ -336,7 +343,6 @@ class Server:
                 break
 
         self.save_data()
-        self.server.close()
 
 
 if __name__ == "__main__":
