@@ -36,7 +36,8 @@ class CustomTree(TreeControl):
         return -1
 
     async def add_under_root(self, name: str, tag: CustomNode) -> None:
-        await self.root.add(name, tag)
+        if name not in (str(child.label) for child in self.root.children):
+            await self.root.add(name, tag)
         # self.refresh(layout=True)
 
     async def add_under_child(self, child: str, name: str, tag: CustomNode) -> None:

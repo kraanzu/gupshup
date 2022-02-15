@@ -9,5 +9,12 @@ class Rank:
         self.name = name
         self.color = color
         self.power = power
-        self.info = "This rank doesn't have an info yet!"
+        self.desc = "This rank doesn't have an info yet!"
+        self.info = (
+            f"name: {self.name}"
+            + "\n"
+            + f"power: {self.power}"
+            + "\n"
+            + f"desc: {self.desc}"
+        )
         self.icon = icon

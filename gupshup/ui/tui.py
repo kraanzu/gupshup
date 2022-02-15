@@ -137,6 +137,10 @@ class Tui(App):
     async def perform_add_room(self, message: Message) -> None:
         await self.house_tree.add_room(message.house, message.text)
 
+    async def perform_del_chat(self, message: Message) -> None:
+        self.house_tree.del_room(message.house, message.room)
+        await self.update_chat_screen(message.house, "general")
+
     async def perform_clear_chat(self, message: Message) -> None:
         screen = f"{message.house}/{message.room}"
         self.chat_screen[screen].chats = ""
@@ -145,6 +149,8 @@ class Tui(App):
 
     async def perform_del_room(self, message: Message) -> None:
         self.house_tree.del_room(message.house, message.room)
+        if self.current_house == message.house and self.current_room == message.room:
+            await self.update_chat_screen(message.house, "general")
 
     async def perform_del_house(self, message: Message) -> None:
         self.house_tree.del_house(message.house)
@@ -183,6 +189,11 @@ class Tui(App):
 
     async def perform_change_room_name(self, message: Message) -> None:
         self.house_tree.change_room_name(message.house, message.room, message.text)
+        self.chat_screen[f"{message.house}/{message.text}"] = self.chat_screen[
+            f"{message.house}/{message.room}"
+        ]
+        del self.chat_screen[f"{message.house}/{message.room}"]
+        await self.update_chat_screen(message.house, message.text)
 
     async def perform_change_room_icon(self, message: Message) -> None:
         self.house_tree.change_room_data(

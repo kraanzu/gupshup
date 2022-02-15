@@ -1,6 +1,5 @@
 import socket
 import os
-from collections import defaultdict
 from pickle import dump, load
 from time import sleep
 from threading import Thread
@@ -83,7 +82,7 @@ class Server:
         Join a house
         """
 
-        house = message.text[6:]
+        house = message.text[6:].strip()
         if house not in self.houses:
             return [message.convert(text="No such house")]
 
@@ -153,18 +152,36 @@ class Server:
         ban/block a user from texting you
         """
 
-        param = message.text[5:]
+        param = message.text[5:].strip()
         if param not in self.users:
             return [
                 message.convert(
                     text="No user with such name!",
                 ),
             ]
+        elif self.users[message.sender].has_banned(param):
+            return message.covert(text="this user is already banned")
         else:
             self.users[message.sender].ban_user(param)
             return [
                 message.convert(
                     text=f"User `{param}` can't send you private texts now",
+                )
+            ]
+
+    def general_unban(self, message) -> List[Message]:
+        """
+        ban/block a user from texting you
+        """
+
+        param = message.text[7:].strip()
+        if not self.users[message.sender].has_banned(param):
+            return message.covert(text="this user is not banned by you")
+        else:
+            self.users[message.sender].unban_user(param)
+            return [
+                message.convert(
+                    text=f"User `{param}` can send you private texts now",
                 )
             ]
 

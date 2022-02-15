@@ -1,10 +1,6 @@
 # thanks to textual_inputs
 # https://github.com/sirfuzzalot/textual-inputs
 
-from __future__ import annotations
-
-from typing import TYPE_CHECKING, List, Optional, Tuple, Union
-
 import rich.box
 from rich.panel import Panel
 from rich.style import Style
@@ -12,10 +8,7 @@ from rich.text import Text
 from textual import events
 from textual.reactive import Reactive
 from textual.widget import Widget
-
-
-if TYPE_CHECKING:
-    from rich.console import RenderableType
+from rich.console import RenderableType
 
 
 class TextInput(Widget):
@@ -31,7 +24,7 @@ class TextInput(Widget):
     def __init__(
         self,
         *,
-        name: Optional[str] = None,
+        name: str | None = None,
         value: str = "",
         placeholder: str = "",
     ) -> None:

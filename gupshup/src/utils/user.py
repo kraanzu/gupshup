@@ -36,6 +36,9 @@ class User:
     def ban_user(self, user: str):
         self.home.ban_user(user)
 
+    def unban_user(self, user: str):
+        self.home.banned_users.remove(user)
+
     def add_chat(self, user: str):
         if user not in self.home.rooms:
             self.send(Message(action="add_room", house="HOME", text=user))

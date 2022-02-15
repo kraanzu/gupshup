@@ -2,7 +2,6 @@ from typing import Dict, List
 from .message import Message
 from .rank import Rank
 from .message_templates import welcome_message, kick_message, mute_message
-from collections import defaultdict
 
 
 class HouseData:
@@ -63,6 +62,7 @@ class House:
 
     def add_room(self, name: str) -> None:
         self.rooms.add(name)
+        self.room_icons[name] = "ﴘ"
 
     def del_room(self, name: str) -> None:
         self.rooms.remove(name)
@@ -95,10 +95,10 @@ class House:
         self.type = "open" if self.type == "private" else "private"
 
     def _generate_house_data(self) -> HouseData:
+
         return HouseData(
             self.name, self.rooms, self.room_icons, self.ranks, self.member_rank
         )
-
 
     def add_member(self, user: str) -> List[Message]:
         self.members.add(user)
@@ -180,6 +180,7 @@ class House:
                 reciepents=list(self.members),
                 data={"rank": self.member_rank[member], "user": member},
             ),
+            message.convert(house="HOME", room="general", text=kick_message(self.name)),
         ]
 
         self.remove_member(member)
@@ -207,6 +208,9 @@ class House:
     def action_join(self, message: Message) -> List[Message]:
         if message.sender in self.banned_users:
             return [message.convert(text="you have been banned from this group")]
+
+        if message.sender in self.members:
+            return [message.convert(text="Are you drunk? You are already in the house")]
 
         if self.type == "open":
             return self.add_member(message.sender)
@@ -252,8 +256,33 @@ class House:
         self.waiting_users.remove(user)
         return self.add_member(user)
 
-    def action_ban_user(self, message: Message) -> List[Message]:
-        user = message.text[10:].strip()
+    def action_reject(self, message: Message) -> List[Message]:
+        user = message.text[8:].strip()
+        if user not in self.waiting_users:
+            return [
+                message.convert(
+                    # house=self.name,
+                    room="general",
+                    text=f"no such user({user}) in the waiting list",
+                    reciepents=[self.king],
+                ),
+            ]
+
+        self.waiting_users.remove(user)
+        return [
+            message.convert(
+                text=f"user {user} was rejected to join the group by {message.sender}"
+            ),
+            message.convert(
+                text=f"Your request to join the group {self.name} was rejected",
+                house="HOME",
+                room="general",
+                reciepents=[user],
+            ),
+        ]
+
+    def action_ban(self, message: Message) -> List[Message]:
+        user = message.text[5:].strip()
         if user in self.banned_users:
             return [message.convert(text=f"user {user} is already banned")]
 
@@ -265,8 +294,8 @@ class House:
             )
         ]
 
-    def action_unban_user(self, message: Message) -> List[Message]:
-        user = message.text[12:].strip()
+    def action_unban(self, message: Message) -> List[Message]:
+        user = message.text[7:].strip()
         if user not in self.banned_users:
             return [message.convert(text=f"user {user} is not in the banned list")]
 
@@ -284,12 +313,24 @@ class House:
             return [message.convert(text="you can't delete the general chat")]
         elif room not in self.rooms:
             return [message.convert(text=f"there is no room with the name {room}")]
+
+        self.rooms.remove(room)
+        del self.room_icons[room]
         return [
             message.convert(action="del_room", room=room, reciepents=list(self.members))
         ]
 
     def action_destroy(self, message: Message):
-        return [message.convert(action="del_house", reciepents=list(self.members))]
+        return [
+            message.convert(action="del_house", reciepents=list(self.members)),
+            Message(
+                action="push_text",
+                house="HOME",
+                room="general",
+                text=f"House {self.name} was burned to shreds",
+                reciepents=list(self.members),
+            ),
+        ]
 
     def action_clear_chat(self, message: Message):
         return [message.convert(action="clear_chat")]
@@ -324,6 +365,9 @@ class House:
         if user not in self.members:
             return [message.convert(text="no such user in the house")]
 
+        if rank not in self.ranks.keys():
+            return [message.convert(text="No such rank in the house")]
+
         prev_rank = self.member_rank[user]
         if prev_rank == rank:
             return [message.convert(text="this user already has this rank")]
@@ -352,13 +396,13 @@ class House:
 
         return [message.convert(text=self.ranks[rank].info)]
 
-    def action_add_rank_info(self, message: Message) -> List[Message]:
+    def action_add_rank_desc(self, message: Message) -> List[Message]:
         param = message.text[15:].strip()
-        rank, info = param.split(" ", 1)
+        rank, desc = param.split(" ", 1)
         if rank not in self.ranks:
             return [message.convert(text="No such rank in the house")]
 
-        self.ranks[rank].info = info
+        self.ranks[rank].desc = desc
         return []
 
     def action_change_rank_icon(self, message: Message) -> List[Message]:
@@ -376,6 +420,10 @@ class House:
     def action_change_rank_name(self, message: Message) -> List[Message]:
         param = message.text[18:].strip()
         rank, name = param.split(" ", 1)
+
+        self.ranks[name] = self.ranks[rank]
+        del self.ranks[rank]
+
         return [
             message.convert(
                 action="change_rank_name",
@@ -402,13 +450,25 @@ class House:
         self.ranks[rank].power = int(power)
         return [
             message.convert(
-                text=f"rank {rank}'s power was set to {power}' by {message.sender}",
+                text=f"rank {rank}'s power was set to {power} by {message.sender}",
                 reciepents=list(self.members),
             )
         ]
 
     def action_change_room_name(self, message: Message) -> List[Message]:
         name = message.text[18:].strip()
+
+        if message.room == "general":
+            return [message.convert(text = "You can't change this room's name")]
+
+        if name in self.rooms:
+            return [message.convert(text="There is already a room with the same name")]
+
+        self.room_icons[name] = self.room_icons[message.room]
+
+        self.add_room(name)
+        self.del_room(message.room)
+
         return [
             message.convert(
                 action="change_room_name",
