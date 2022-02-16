@@ -1,0 +1,54 @@
+# Gupshup 
+
+Gupshup is TUI (Text User Interface) chat application with a great UI and feel! </br>
+It implements various features as modern chat applications
+such as ranking systems and special commands. </br>
+
+It is good for now but I'll add more features to it :) </br>
+There is a demo video attached below which will make it easier for you to understand the concept.
+
+And also, It is built on top of [textual](https://github.com/Textualize/textual) which provides the UI for the application</br>
+Shoutouts to [@willmcgugan](https://github.com/willmcgugan) for such a great library!
+
+# Installation
+
+**Note**: Termtype needs python version ^3.10</br>
+***Note:*** The default icons used in the app are a part of [Nerfonts](https://www.nerdfonts.com/) </br>
+***Note:*** This might not work on windows as intended but windows support is in pipeline and textual is working on it!
+
+## One Liner
+```bash
+python -m pip install git+https://github.com/kraanzu/gupshup.git
+```
+
+## Or if you prefer Manual Installation
+``` bash
+git clone https://github.com/kraanzu/gupshup.git
+cd termtyper
+pip install .
+```
+
+# Demo
+
+# Usage
+A script be automatically generated to run it with a simple command gupshup in your terminal
+
+**For spinning up a server:**
+```bash
+gupshup server
+```
+
+**For connecting to a server**
+```bash
+gupshup <username> 
+```
+
+# TODOs
+- [ ] Make a config file for some customizations
+- [ ] Add bots 
+- [ ] File Uploads
+- [ ] A better structure for chat screen than just plain text
+- [ ] Add an AUR package install 
+
+# Contribution 
+Always open to PRs :)
