@@ -232,14 +232,22 @@ class House:
         return [message.convert(action="toggle_silent")]
 
     def action_add_room(self, message: Message) -> List[Message]:
-        room = message.text[10:]
+        params = message.text[10:].split()
+        room = params[0]
         if room in self.rooms:
             return [message.convert(text="There is already a room with same name!")]
 
         self.add_room(room)
-        return [
+        x = [
             message.convert(action="add_room", text=room, reciepents=list(self.members))
         ]
+
+        if len(params) > 1:
+            x.append(
+                message.convert(action="change_room_icon", room=room, text=params[1])
+            )
+
+        return x
 
     def action_accept(self, message: Message) -> List[Message]:
         user = message.text[8:].strip()
@@ -336,16 +344,33 @@ class House:
         return [message.convert(action="clear_chat")]
 
     def action_add_rank(self, message: Message):
-        rank = message.text[10:].strip()
+        params = message.text[10:].strip().split()
+        rank = params[0]
         if rank in self.ranks:
             return [message.convert(text="there is already a rank with same name")]
 
         self.ranks[rank] = Rank(rank)
-        return [
+        x = [
             message.convert(
                 action="add_rank", text=rank, reciepents=list(self.members)
             ),
         ]
+
+        if len(params) > 1:
+            x += (
+                message.convert(
+                    action="change_rank_color", data={"rank": rank, "color": params[1]}
+                ),
+            )
+
+        if len(params) > 2:
+            x += (
+                message.convert(
+                    action="change_rank_icon", data={"rank": rank, "icon": params[2]}
+                ),
+            )
+
+        return x
 
     def action_del_rank(self, message: Message):
         rank = message.text[10:].strip()
@@ -459,7 +484,7 @@ class House:
         name = message.text[18:].strip()
 
         if message.room == "general":
-            return [message.convert(text = "You can't change this room's name")]
+            return [message.convert(text="You can't change this room's name")]
 
         if name in self.rooms:
             return [message.convert(text="There is already a room with the same name")]
