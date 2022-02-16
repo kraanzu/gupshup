@@ -1,8 +1,8 @@
-# Gupshup 
+# Gupshup
 
 Gupshup is TUI (Text User Interface) chat application with a great UI and feel! </br>
 It implements various features as modern chat applications
-such as ranking systems and special commands. </br>
+such as ranking systems and special commands. see [COMMANDS.md](https://github.com/kraanzu/gupshup/blob/main/COMMANDS.md) </br>
 
 It is good for now but I'll add more features to it :) </br>
 There is a demo video attached below which will make it easier for you to understand the concept.
@@ -12,7 +12,7 @@ Shoutouts to [@willmcgugan](https://github.com/willmcgugan) for such a great lib
 
 # Installation
 
-**Note**: Termtype needs python version ^3.10</br>
+***Note:*** Termtype needs python version ^3.10</br>
 ***Note:*** The default icons used in the app are a part of [Nerfonts](https://www.nerdfonts.com/) </br>
 ***Note:*** This might not work on windows as intended but windows support is in pipeline and textual is working on it!
 
@@ -29,6 +29,7 @@ pip install .
 ```
 
 # Demo
+to be uploaded
 
 # Usage
 A script be automatically generated to run it with a simple command gupshup in your terminal
@@ -40,15 +41,17 @@ gupshup server
 
 **For connecting to a server**
 ```bash
-gupshup <username> 
+gupshup <username>
 ```
 
 # TODOs
-- [ ] Make a config file for some customizations
-- [ ] Add bots 
+- [ ] User-based theming
+- [ ] Add bots
 - [ ] File Uploads
 - [ ] A better structure for chat screen than just plain text
-- [ ] Add an AUR package install 
+- [ ] Add an AUR package install
 
-# Contribution 
+# Contribution
 Always open to PRs :)
+
+<p align="center"><a href="https://github.com/kraanzu/gupshup/blob/main/LICENSE"><img src="https://img.shields.io/static/v1.svg?style=flat-square&label=License&message=MIT&logoColor=eceff4&logo=github&colorA=4c566a&colorB=88c0d0"/></a></p>
