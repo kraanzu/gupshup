@@ -6,7 +6,7 @@ such as ranking systems and special commands. </br>
 see [here!](https://github.com/kraanzu/gupshup/blob/main/COMMANDS.md) </br>
 
 It is good for now but I'll add more features to it :) </br>
-There is a demo video attached below which will make it easier for you to understand the concept.
+There is a screenshot of the application attached below which will make it easier for you to understand the concept.
 
 And also, It is built on top of [textual](https://github.com/Textualize/textual) which provides the UI for the application</br>
 Shoutouts to [@willmcgugan](https://github.com/willmcgugan) for such a great library!
@@ -40,7 +40,7 @@ A script be automatically generated to run it with a simple command gupshup in y
 gupshup server
 ```
 
-**For connecting to a server**
+**For connecting to a server:**
 ```bash
 gupshup <username>
 ```
