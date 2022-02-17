@@ -362,6 +362,7 @@ class House:
                     action="change_rank_color", data={"rank": rank, "color": params[1]}
                 ),
             )
+            self.ranks[rank].color = params[1]
 
         if len(params) > 2:
             x += (
@@ -369,6 +370,7 @@ class House:
                     action="change_rank_icon", data={"rank": rank, "icon": params[2]}
                 ),
             )
+            self.ranks[rank].icon = params[2]
 
         return x
 
@@ -378,6 +380,8 @@ class House:
             return [message.convert(text="there is no such rank in this house")]
         if rank in ["king", "pawn"]:
             return [message.convert(text="You can't delete this rank")]
+
+        del self.ranks[rank]
         return [
             message.convert(
                 action="del_rank", text=rank, reciepents=list(self.members)
