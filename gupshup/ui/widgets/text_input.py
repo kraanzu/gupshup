@@ -16,9 +16,9 @@ class TextInput(Widget):
     A simple text input widget.
     """
 
-    value: Reactive[str] = Reactive("")
+    value: str = ""
     cursor: str = "|"
-    _cursor_position: Reactive[int] = Reactive(0)
+    _cursor_position: int = 0
     _has_focus: Reactive[bool] = Reactive(False)
 
     def __init__(
@@ -75,9 +75,13 @@ class TextInput(Widget):
     async def on_blur(self, _: events.Blur) -> None:
         self._has_focus = False
 
-    async def on_key(self, event: events.Key) -> None:
+    def clear(self):
+        self.value = ""
+        self._cursor_position = 0
+        self.refresh()
 
-        match event.key:
+    async def keypress(self, key: str) -> None:
+        match key:
             case "left":
                 self._cursor_position = max(self._cursor_position - 1, 0)
 
@@ -104,7 +108,7 @@ class TextInput(Widget):
                     + self.value[self._cursor_position + 1 :]
                 )
 
-        if len(event.key) == 1:
+        if len(key) == 1:
             # Q: Why only 1?
             # A: Apparently, At the time of this writing, there is no difference between ctrl+v and ctrl+V
             #    Also, there are other keys to keep an eye out for other keys to such as pageDn and others
@@ -112,7 +116,7 @@ class TextInput(Widget):
 
             self.value = (
                 self.value[: self._cursor_position]
-                + event.key
+                + key
                 + self.value[self._cursor_position :]
             )
             self._cursor_position += 1

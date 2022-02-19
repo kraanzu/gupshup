@@ -53,6 +53,10 @@ class Tui(App):
     async def on_key(self, event: events.Key):
         if event.key == "enter":
             await self.action_send_message()
+        else:
+            if self.input_box.has_focus:
+                await self.input_box.keypress(event.key)
+                event.stop()
 
     async def action_send_message(self):
         """
@@ -71,9 +75,7 @@ class Tui(App):
                 text=value,
             )
         )
-
-        self.input_box.value = ""
-        self.input_box.refresh()
+        self.input_box.clear()
 
     # +-------------------------------+
     # | Methods to manage message     |
