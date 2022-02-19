@@ -2,6 +2,7 @@ import socket
 import os
 from pickle import dump, load
 from time import sleep
+from queue import Queue
 from threading import Thread
 from typing import Dict, List
 from .utils import Message, House, User, Channel
@@ -23,6 +24,7 @@ class Server:
         self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server.bind((HOST, PORT))
         self.users: Dict[str, Channel] = dict()
+        self.worker_queue = Queue()
 
         # READS THE OFFLINE DATA PRESENT
         try:
@@ -38,6 +40,13 @@ class Server:
             self.user_messages: Dict[str, List[Message]] = dict()
             self.user_db: Dict[str, User] = dict()
             self.save_data()
+
+        Thread(target=self._execute_queue, daemon=True).start()
+
+    def _execute_queue(self) -> None:
+        while True:
+            while not self.worker_queue.empty():
+                self.broadcast(*self.worker_queue.get())
 
     def broadcast(
         self, message: Message, reciepents: List[str], from_server: bool = False
@@ -299,7 +308,8 @@ class Server:
     def serve_user(self, user: str, start: int) -> None:
         if start != -1:
             for message in self.user_messages.get(user, [])[start:]:
-                self.broadcast(message, [user], True)
+                self.worker_queue.put((message, [user], True))
+                # self.broadcast(message, [user], True)
 
         while True:
             try:
@@ -308,15 +318,17 @@ class Server:
                     message_list = self.handle_user_message(message)
                     for message in message_list:
                         recipients = message.take_recipients()
-                        self.broadcast(message, recipients)
+                        # self.broadcast(message, recipients)
+                        self.worker_queue.put((message, recipients))
                 else:
                     message_list = self.houses[message.house].process_message(message)
                     for message in message_list:
                         recipients = message.take_recipients()
-                        self.broadcast(message, recipients)
+                        self.worker_queue.put((message, recipients))
+                        # self.broadcast(message, recipients)
 
             except Exception as e:
-                print('EXCEPTION: ', e)
+                print("EXCEPTION: ", e)
                 print(f"{user} disconnected")
                 return
 
