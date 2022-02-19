@@ -510,7 +510,6 @@ class House:
 
     def action_change_room_icon(self, message: Message) -> List[Message]:
         name = message.text[18:].strip()
-        print(message.text)
         return [
             message.convert(
                 action="change_room_icon",
@@ -581,7 +580,6 @@ class House:
             ]
         try:
             cmd = f"self.action_{action}(message)"
-            print("special", cmd)
             return eval(cmd)
 
         except AttributeError:

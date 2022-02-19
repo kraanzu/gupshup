@@ -256,7 +256,6 @@ class Server:
             try:
                 action, *_ = text[1:].split(" ", 1)
                 cmd = f"self.general_{action}(message)"
-                print(cmd)
                 return eval(cmd)
 
             except AttributeError:
@@ -280,7 +279,6 @@ class Server:
                     try:
                         action, *_ = text[1:].split(" ", 1)
                         cmd = f"self.action_{action}(message)"
-                        print(cmd)
                         return eval(cmd)
 
                     except AttributeError:
@@ -309,7 +307,6 @@ class Server:
         if start != -1:
             for message in self.user_messages.get(user, [])[start:]:
                 self.worker_queue.put((message, [user], True))
-                # self.broadcast(message, [user], True)
 
         while True:
             try:
@@ -318,17 +315,14 @@ class Server:
                     message_list = self.handle_user_message(message)
                     for message in message_list:
                         recipients = message.take_recipients()
-                        # self.broadcast(message, recipients)
                         self.worker_queue.put((message, recipients))
                 else:
                     message_list = self.houses[message.house].process_message(message)
                     for message in message_list:
                         recipients = message.take_recipients()
                         self.worker_queue.put((message, recipients))
-                        # self.broadcast(message, recipients)
 
-            except Exception as e:
-                print("EXCEPTION: ", e)
+            except :
                 print(f"{user} disconnected")
                 return
 
