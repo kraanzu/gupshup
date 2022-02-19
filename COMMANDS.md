@@ -17,14 +17,14 @@ but if you are currently in jon_doe's chat you will write -- /ban
 | ban          |  Allows you to ban a user such that the user will not be able to text you                            | /ban [name]                |
 | unban        |  Allows you to unban a user, if there is one                                                         | /unban (username)          |
 | clear_chat   |  Allows you to clear the chat with the user the user will stay in direct chats                       | /clear_chat [name]         |
-| del_chat     |  This is a bit different from clear chat, in this the user option will be removed from direct chat   | /del_chat [name]           |
+| del_room     |  This is a bit different from clear chat, in this the user option will be removed from direct chat   | /del_chat [name]           |
 | toggle_silent|  You won't hear a notification bell if this user texts you                                           | /toggle_silent [name]      |
 
 
 ## Commands for Houses
 
 Note: commands are executed only if the user executing them has a minimum threshold of the required power (except bye and clear_chat)
-There are two types of houses 
+There are two types of houses
 - open: Anyone can join the house
 - private: A request is sent to the owner of the house
 <pre>

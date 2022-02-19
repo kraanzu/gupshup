@@ -239,7 +239,9 @@ class House:
 
         self.add_room(room)
         x = [
-            message.convert(action="add_room", text=room, reciepents=list(self.members))
+            message.convert(
+                action="add_room", data={"room": room}, reciepents=list(self.members)
+            )
         ]
 
         if len(params) > 1:
@@ -352,7 +354,7 @@ class House:
         self.ranks[rank] = Rank(rank)
         x = [
             message.convert(
-                action="add_rank", text=rank, reciepents=list(self.members)
+                action="add_rank", data={"rank": rank}, reciepents=list(self.members)
             ),
         ]
 
@@ -384,7 +386,7 @@ class House:
         del self.ranks[rank]
         return [
             message.convert(
-                action="del_rank", text=rank, reciepents=list(self.members)
+                action="del_rank", data={"rank": rank}, reciepents=list(self.members)
             ),
         ]
 
@@ -501,7 +503,7 @@ class House:
         return [
             message.convert(
                 action="change_room_name",
-                text=name,
+                data={"name": name},
                 reciepents=list(self.members),
             )
         ]
@@ -512,7 +514,7 @@ class House:
         return [
             message.convert(
                 action="change_room_icon",
-                text=name,
+                data = {"icon": name},
                 reciepents=list(self.members),
             )
         ]

@@ -17,7 +17,7 @@ from .widgets import (
 )
 
 from ..src import Client
-from ..src.utils import Message, HouseData, House
+from ..src.utils import Message, HouseData
 
 percent = lambda percent, total: int(percent * total / 100)
 
@@ -137,12 +137,7 @@ class Tui(App):
                 self.house_tree.increase_pending(message.house, message.room)
 
     async def perform_add_room(self, message: Message) -> None:
-        await self.house_tree.add_room(message.house, message.text)
-
-    async def perform_del_chat(self, message: Message) -> None:
-        self.house_tree.del_room(message.house, message.room)
-        self.chat_screen[f"{message.house}/{message.room}"].chats = ""
-        await self.update_chat_screen(message.house, "general")
+        await self.house_tree.add_room(message.house, message.data["room"])
 
     async def perform_clear_chat(self, message: Message) -> None:
         screen = f"{message.house}/{message.room}"
@@ -151,8 +146,11 @@ class Tui(App):
             await self.chat_scroll.update("")
 
     async def perform_del_room(self, message: Message) -> None:
+        screen = f"{message.house}/{message.room}"
+
         self.house_tree.del_room(message.house, message.room)
-        if self.current_house == message.house and self.current_room == message.room:
+        self.chat_screen[screen].chats = ""
+        if self.current_screen == screen:
             await self.update_chat_screen(message.house, "general")
 
     async def perform_del_house(self, message: Message) -> None:
@@ -160,10 +158,10 @@ class Tui(App):
         await self.update_chat_screen("HOME", "general")
 
     async def perform_add_rank(self, message: Message) -> None:
-        await self.member_lists[message.house].add_rank(message.text)
+        await self.member_lists[message.house].add_rank(message.data["rank"])
 
     async def perform_del_rank(self, message: Message) -> None:
-        await self.member_lists[message.house].del_rank(message.text)
+        await self.member_lists[message.house].del_rank(message.data["rank"])
 
     async def perform_add_user_rank(self, message: Message) -> None:
         await self.member_lists[message.house].add_user_to_rank(
@@ -191,16 +189,17 @@ class Tui(App):
         )
 
     async def perform_change_room_name(self, message: Message) -> None:
-        self.house_tree.change_room_name(message.house, message.room, message.text)
-        self.chat_screen[f"{message.house}/{message.text}"] = self.chat_screen[
+        name = message.data["name"]
+        self.house_tree.change_room_name(message.house, message.room, name)
+        self.chat_screen[f"{message.house}/{name}"] = self.chat_screen[
             f"{message.house}/{message.room}"
         ]
         del self.chat_screen[f"{message.house}/{message.room}"]
-        await self.update_chat_screen(message.house, message.text)
+        await self.update_chat_screen(message.house, name)
 
     async def perform_change_room_icon(self, message: Message) -> None:
         self.house_tree.change_room_data(
-            message.house, message.room, "icon", message.text
+            message.house, message.room, "icon", message.data["icon"]
         )
 
     async def perform_toggle_silent(self, message: Message) -> None:

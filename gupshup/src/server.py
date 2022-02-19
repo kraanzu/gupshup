@@ -113,7 +113,7 @@ class Server:
                 )
             ]
 
-        elif param not in self.users:
+        elif param not in self.user_db.keys():
             return [
                 message.convert(
                     text="No user with such name!",
@@ -128,7 +128,7 @@ class Server:
                 ]
             else:
                 return [
-                    message.convert(action="add_room", text=param),
+                    message.convert(action="add_room", data={"room": param}),
                     message.convert(
                         text="You can now chat with the user",
                     ),
@@ -296,7 +296,7 @@ class Server:
                 return [
                     message.convert(
                         action="add_room",
-                        text=message.sender,
+                        data={"room": message.sender},
                         reciepents=[message.room],
                     ),
                     message.convert(
