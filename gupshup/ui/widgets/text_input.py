@@ -9,6 +9,7 @@ from textual import events
 from textual.reactive import Reactive
 from textual.widget import Widget
 from rich.console import RenderableType
+import pyperclip
 
 
 class TextInput(Widget):
@@ -80,6 +81,22 @@ class TextInput(Widget):
         self._cursor_position = 0
         self.refresh()
 
+    def _insert_text(self, text: str | None = None) -> None:
+
+        try:
+            # Will throw an error if `xclip` if not installed on the system
+            if text is None:
+                text = pyperclip.paste()
+
+            self.value = (
+                self.value[: self._cursor_position]
+                + text
+                + self.value[self._cursor_position :]
+            )
+            self._cursor_position += len(text)
+        except:
+            pass
+
     async def keypress(self, key: str) -> None:
         match key:
             case "left":
@@ -108,12 +125,10 @@ class TextInput(Widget):
                     + self.value[self._cursor_position + 1 :]
                 )
 
-        if len(key) == 1:
-            # Q: Why only 1?
-            # A: Apparently, At the time of this writing, there is no difference between ctrl+v and ctrl+V
-            #    Also, there are other keys to keep an eye out for other keys to such as pageDn and others
-            #    Also, the UI hangs on pressing Alt key
+            case "ctrl+v":
+                self._insert_text()
 
+        if len(key) == 1:
             self.value = (
                 self.value[: self._cursor_position]
                 + key
