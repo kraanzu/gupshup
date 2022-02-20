@@ -24,13 +24,16 @@ class ChatScreen(TreeControl):
 
         label = Text.from_markup(str(node.label))
         if node.id == self.hover_node:
-            label.stylize("reverse")
+            label.append(" <=")
+            label.stylize("bold")
 
         label.apply_meta(meta)
         return label
 
-    # def render(self) -> RenderableType:
-    #     return self.chats
+    async def clear_chat(self):
+        self.root.children.clear()
+        self.root.tree.children.clear()
+        self.refresh()
 
     async def push_text(self, message: Message) -> None:
         if not self.root.expanded:

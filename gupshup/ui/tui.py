@@ -144,9 +144,9 @@ class Tui(App):
 
     async def perform_clear_chat(self, message: Message) -> None:
         screen = f"{message.house}/{message.room}"
-        self.chat_screen[screen].chats = ""
+        await self.chat_screen[screen].clear_chat()
         if screen == self.current_screen:
-            self.chat_scroll[self.current_screen] = ScrollView()
+            self.chat_screen[screen].refresh()
 
     async def perform_del_room(self, message: Message) -> None:
         screen = f"{message.house}/{message.room}"
@@ -297,7 +297,7 @@ class Tui(App):
 
         if self.current_screen not in self.chat_scroll:
             self.chat_scroll[self.current_screen] = ScrollView(
-                self.chat_screen[self.current_screen]
+                self.chat_screen[self.current_screen], gutter=(0, 1)
             )
 
         # await self.chat_scroll.update(
