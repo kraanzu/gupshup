@@ -42,6 +42,7 @@ class Tui(App):
         self.current_screen = f"{self.current_house}/{self.current_room}"
 
         self.member_lists: dict[str, MemberList] = defaultdict(MemberList)
+        self.member_scrolls: dict[str, ScrollView] = defaultdict(ScrollView)
 
         # some keybindings
         await self.bind("ctrl+b", "view.toggle('house_tree')", "toggle house tree")
@@ -292,7 +293,11 @@ class Tui(App):
             # (home = False) so that it doesn't scroll back each and every time when updated
         )
 
-        self.member_list_scroll = ScrollView(self.member_lists[self.current_house])
+        # self.member_list_scroll = ScrollView(self.member_lists[self.current_house])
+        if self.current_house not in self.member_scrolls:
+            self.member_scrolls[self.current_house] = ScrollView(
+                self.member_lists[self.current_house]
+            )
 
         self.chat_scroll.animate(
             "y",
@@ -309,7 +314,7 @@ class Tui(App):
         # RIGHT WIDGETS
         if self.current_house != "HOME":
             await self.view.dock(
-                self.member_lists[self.current_house],
+                self.member_scrolls[self.current_house],
                 edge="right",
                 size=int(0.15 * x),
                 name="member_list",
