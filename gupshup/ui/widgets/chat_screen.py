@@ -1,20 +1,42 @@
 from textual.widget import Widget
+from textual.widgets import TreeControl, TreeNode
 from rich.console import RenderableType
+from rich.text import Text
 from ...src.utils import Message
 
 
-class ChatScreen(Widget):
+class ChatScreen(TreeControl):
     """
     A screen for providing chats
     """
 
-    def __init__(self, name: str | None = None):
-        super().__init__(name)
+    def __init__(self, name: str = ""):
+        super().__init__(name, name)
         self.chats = ""
+        self._tree.hide_root = True
 
-    def render(self) -> RenderableType:
-        return self.chats
+    def render_node(self, node: TreeNode) -> RenderableType:
+        meta = {
+            "@click": f"click_label({node.id})",
+            "tree_node": node.id,
+            "cursor": node.is_cursor,
+        }
 
-    def push_text(self, message: Message) -> None:
+        label = Text.from_markup(str(node.label))
+        if node.id == self.hover_node:
+            label.stylize("reverse")
+
+        label.apply_meta(meta)
+        return label
+
+    # def render(self) -> RenderableType:
+    #     return self.chats
+
+    async def push_text(self, message: Message) -> None:
+        if not self.root.expanded:
+            await self.root.expand()
+
+        msg = f"{message.sender}: {message.text}"
         self.chats += f"\n{message.sender}: {message.text}"
+        await self.root.add(msg, "message")
         self.refresh()

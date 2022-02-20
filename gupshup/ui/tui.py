@@ -120,21 +120,23 @@ class Tui(App):
         Performs adding all the text messages to their respective locations
         """
         screen = f"{message.house}/{message.room}"
-        self.chat_screen[screen].push_text(message)
+        await self.chat_screen[screen].push_text(message)
 
         if not local:  # check if local/offline data is not being pushed
             if self.current_screen == screen:
-                await self.chat_scroll.update(
-                    self.chat_screen[screen].chats, home=False
-                )
-                self.chat_scroll.animate(
-                    "y",
-                    self.chat_scroll.max_scroll_y + self.chat_scroll.y,
-                    easing="none",
-                )
+                # await self.chat_scroll.update(
+                #     self.chat_screen[screen].chats, home=False
+                # )
+                self.chat_screen[self.current_screen].refresh(layout=True)
+                # self.chat_scroll.animate(
+                #     "y",
+                #     self.chat_scroll.max_scroll_y + self.chat_scroll.y,
+                #     easing="none",
+                # )
             else:
                 if not self.house_tree.is_room_silent(message.house, message.room):
                     self.console.bell()
+
                 self.house_tree.increase_pending(message.house, message.room)
 
     async def perform_add_room(self, message: Message) -> None:
@@ -144,7 +146,7 @@ class Tui(App):
         screen = f"{message.house}/{message.room}"
         self.chat_screen[screen].chats = ""
         if screen == self.current_screen:
-            await self.chat_scroll.update("")
+            self.chat_scroll[self.current_screen] = ScrollView()
 
     async def perform_del_room(self, message: Message) -> None:
         screen = f"{message.house}/{message.room}"
@@ -218,6 +220,11 @@ class Tui(App):
         """
         Method to continously listen for new messages from the server
         """
+
+        # Is being called every 0.1 seconds to update
+        # Proposal for a `call_threaded` function has not been merged yet..
+        # see: https://github.com/Textualize/textual/issues/85
+
         if self.queue.qsize():
             message = self.queue.get()
             await self.execute_message(message)
@@ -231,7 +238,8 @@ class Tui(App):
 
         self.banner = Banner()
         self.chat_screen = defaultdict(ChatScreen)
-        self.chat_scroll = ScrollView(gutter=(0, 1))
+        # self.chat_scroll = ScrollView(gutter=(0, 1))
+        self.chat_scroll = defaultdict(ScrollView)
 
         self.house_tree = HouseTree()
         await self.house_tree.add_house("HOME")
@@ -259,7 +267,7 @@ class Tui(App):
                 await eval(f"self.perform_{message.action}(message)")
 
         self.client.start_connection()
-        self.set_interval(0.2, self.server_listen)
+        self.set_interval(0.1, self.server_listen)
 
     async def on_resize(self, _: events.Resize) -> None:
         await self.refresh_screen()
@@ -287,11 +295,16 @@ class Tui(App):
         await self._clear_screen()
         x, y = os.get_terminal_size()
 
-        await self.chat_scroll.update(
-            self.chat_screen[self.current_screen].chats,
-            home=False
-            # (home = False) so that it doesn't scroll back each and every time when updated
-        )
+        if self.current_screen not in self.chat_scroll:
+            self.chat_scroll[self.current_screen] = ScrollView(
+                self.chat_screen[self.current_screen]
+            )
+
+        # await self.chat_scroll.update(
+        #     self.chat_screen[self.current_screen].chats,
+        #     home=False
+        #     # (home = False) so that it doesn't scroll back each and every time when updated
+        # )
 
         # self.member_list_scroll = ScrollView(self.member_lists[self.current_house])
         if self.current_house not in self.member_scrolls:
@@ -299,7 +312,7 @@ class Tui(App):
                 self.member_lists[self.current_house]
             )
 
-        self.chat_scroll.animate(
+        self.chat_scroll[self.current_screen].animate(
             "y",
             10**5,
             # A large enough value to make sure it really scrolls down to the end
@@ -313,6 +326,7 @@ class Tui(App):
 
         # RIGHT WIDGETS
         if self.current_house != "HOME":
+            # There is *NO* member list for `HOME`
             await self.view.dock(
                 self.member_scrolls[self.current_house],
                 edge="right",
@@ -339,7 +353,7 @@ class Tui(App):
             name="banner",
         )
         await self.view.dock(
-            self.chat_scroll,
+            self.chat_scroll[self.current_screen],
             size=percent(75, y),
             name="chat_screen",
         )
