@@ -49,7 +49,6 @@ gupshup <username>
 - [ ] User-based theming
 - [ ] Add bots
 - [ ] File Uploads
-- [ ] A better structure for chat screen than just plain text
 
 # Contribution
 Always open to PRs :)
