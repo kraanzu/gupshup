@@ -2,10 +2,26 @@ import sys
 from .ui import Tui
 from .src.server import Server
 
+USAGE = """
+# USAGE:
+----------
+
+for server:
+gupshup server
+
+for user:
+gupshup <username>
+"""
+
+
 def main():
-    if sys.argv[1].lower() == "server":
-        server = Server()
-        server.start_connection()
+    if len(sys.argv) > 1:
+        if sys.argv[1].lower() == "server":
+            print("ok")
+            server = Server()
+            server.start_connection()
+        else:
+            app = Tui()
+            app.run()
     else:
-        app = Tui()
-        app.run()
+        print(USAGE)

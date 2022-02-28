@@ -11,8 +11,13 @@ from .utils import Message, Channel
 HOST = "localhost"
 PORT = 5500
 HOME = os.path.expanduser("~")
-GUPSHUP_FOLDER = os.path.join(HOME, ".gupshup")
-CHAT_DATA = os.path.join(GUPSHUP_FOLDER, argv[1])
+
+
+try:
+    GUPSHUP_FOLDER = os.path.join(HOME, ".gupshup")
+    CHAT_DATA = os.path.join(GUPSHUP_FOLDER, argv[1])
+except:
+    pass
 
 
 class Client:
