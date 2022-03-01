@@ -17,6 +17,8 @@ class TextInput(Widget):
     A simple text input widget.
     """
 
+    # Q: Why not make value or cursor reactive?
+    # A: Apparenly it was causing a hang
     value: str = ""
     cursor: str = "|"
     _cursor_position: int = 0
