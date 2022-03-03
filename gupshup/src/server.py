@@ -20,8 +20,12 @@ class Server:
     """
 
     def __init__(self) -> None:
-        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.server = socket.socket(
+            socket.AF_INET, socket.SOCK_STREAM
+        )
+        self.server.setsockopt(
+            socket.SOL_SOCKET, socket.SO_REUSEADDR, 1
+        )
         self.server.bind((HOST, PORT))
         self.users: Dict[str, Channel] = dict()
         self.worker_queue = Queue()
@@ -34,14 +38,22 @@ class Server:
 
         try:
             with open(SERVER_DATA, "rb") as f:
-                self.houses, self.user_messages, self.user_db = load(f)
+                (
+                    self.houses,
+                    self.user_messages,
+                    self.user_db,
+                ) = load(f)
         except:
             self.houses: Dict[str, House] = dict()
-            self.user_messages: Dict[str, List[Message]] = dict()
+            self.user_messages: Dict[
+                str, List[Message]
+            ] = dict()
             self.user_db: Dict[str, User] = dict()
             self.save_data()
 
-        Thread(target=self._execute_queue, daemon=True).start()
+        Thread(
+            target=self._execute_queue, daemon=True
+        ).start()
 
     def _execute_queue(self) -> None:
         while True:
@@ -49,22 +61,32 @@ class Server:
                 self.broadcast(*self.worker_queue.get())
 
     def broadcast(
-        self, message: Message, reciepents: List[str], from_server: bool = False
+        self,
+        message: Message,
+        reciepents: List[str],
+        from_server: bool = False,
     ) -> None:
         """
         Broadcasts the user message to the respective location
         """
 
         if not from_server:
-            if message.house != "HOME" and message.sender != "SERVER":
+            if (
+                message.house != "HOME"
+                and message.sender != "SERVER"
+            ):
                 house = self.houses[message.house]
-                color = house.ranks[house.member_rank[message.sender]].color
+                color = house.ranks[
+                    house.member_rank[message.sender]
+                ].color
             elif message.sender == "SERVER":
                 color = "red"
             else:
                 color = "magenta"
 
-            message.sender = f"[{color}]{message.sender}[/{color}]"
+            message.sender = (
+                f"[{color}]{message.sender}[/{color}]"
+            )
 
         for user in reciepents:
             # Send the data if possible and finally save it in DB for later sending
@@ -74,7 +96,9 @@ class Server:
                 pass
             finally:
                 if not from_server:
-                    self.user_messages[user] = self.user_messages.get(user, []) + [
+                    self.user_messages[
+                        user
+                    ] = self.user_messages.get(user, []) + [
                         message
                     ]
 
@@ -87,7 +111,9 @@ class Server:
     # +-------------------------------+
 
     # SYNTAX : general_<action>(message: Message) -> List[Message]
-    def general_join(self, message: Message) -> List[Message]:
+    def general_join(
+        self, message: Message
+    ) -> List[Message]:
         """
         Join a house
         """
@@ -120,7 +146,9 @@ class Server:
                 ),
             ]
         else:
-            if self.user_db[param].has_banned(message.sender):
+            if self.user_db[param].has_banned(
+                message.sender
+            ):
                 return [
                     message.convert(
                         text="This user has blocked you so you can't connect",
@@ -128,7 +156,10 @@ class Server:
                 ]
             else:
                 return [
-                    message.convert(action="add_room", data={"room": param}),
+                    message.convert(
+                        action="add_room",
+                        data={"room": param},
+                    ),
                     message.convert(
                         text="You can now chat with the user",
                     ),
@@ -148,11 +179,17 @@ class Server:
             ]
         else:
             message.house = param
-            self.houses[param] = House(param, message.sender)
+            self.houses[param] = House(
+                param, message.sender
+            )
             return [
                 message.convert(
                     action="add_house",
-                    data={"house": self.houses[param]._generate_house_data()},
+                    data={
+                        "house": self.houses[
+                            param
+                        ]._generate_house_data()
+                    },
                 )
             ]
 
@@ -169,7 +206,9 @@ class Server:
                 ),
             ]
         elif self.user_db[message.sender].has_banned(param):
-            return message.covert(text="this user is already banned")
+            return message.covert(
+                text="this user is already banned"
+            )
         else:
             self.user_db[message.sender].ban_user(param)
             return [
@@ -184,8 +223,12 @@ class Server:
         """
 
         param = message.text[7:].strip()
-        if not self.user_db[message.sender].has_banned(param):
-            return message.covert(text="this user is not banned by you")
+        if not self.user_db[message.sender].has_banned(
+            param
+        ):
+            return message.covert(
+                text="this user is not banned by you"
+            )
         else:
             self.user_db[message.sender].unban_user(param)
             return [
@@ -194,14 +237,18 @@ class Server:
                 )
             ]
 
-    def general_toggle_silent(self, message: Message) -> List[Message]:
+    def general_toggle_silent(
+        self, message: Message
+    ) -> List[Message]:
         """
         Toggle silent for a direct conversation
         """
 
         return [message.convert(action="toggle_silent")]
 
-    def general_clear_chat(self, message: Message) -> List[Message]:
+    def general_clear_chat(
+        self, message: Message
+    ) -> List[Message]:
         """
         Del the chat with the user
         """
@@ -225,20 +272,26 @@ class Server:
         self.user_db[message.sender].ban_user(message.room)
         return []
 
-    def action_toggle_silent(self, message: Message) -> List[Message]:
+    def action_toggle_silent(
+        self, message: Message
+    ) -> List[Message]:
         """
         Toggle silent for the user
         """
         # Why again? see line `196`
         return [message.convert(action="toggle_silent")]
 
-    def action_clear_chat(self, message: Message) -> List[Message]:
+    def action_clear_chat(
+        self, message: Message
+    ) -> List[Message]:
         """
         Delete chat with the user
         """
         return [message.convert(action="clear_chat")]
 
-    def action_del_room(self, message: Message) -> List[Message]:
+    def action_del_room(
+        self, message: Message
+    ) -> List[Message]:
         """
         Delete the chat along with the room
         """
@@ -246,7 +299,9 @@ class Server:
 
     # ----------------------- END OF HOME/!general FUNCTIONS ---------------------------------
 
-    def handle_user_message(self, message: Message) -> List[Message]:
+    def handle_user_message(
+        self, message: Message
+    ) -> List[Message]:
         """
         Handles non-special messages from a user
         """
@@ -278,7 +333,9 @@ class Server:
                 if message.text[0] == "/":
                     try:
                         action, *_ = text[1:].split(" ", 1)
-                        cmd = f"self.action_{action}(message)"
+                        cmd = (
+                            f"self.action_{action}(message)"
+                        )
                         return eval(cmd)
 
                     except AttributeError:
@@ -288,7 +345,9 @@ class Server:
                             )
                         ]
 
-                elif self.user_db[message.room].has_banned(message.sender):
+                elif self.user_db[message.room].has_banned(
+                    message.sender
+                ):
                     return [message.convert(sender="self")]
 
                 return [
@@ -298,31 +357,49 @@ class Server:
                         reciepents=[message.room],
                     ),
                     message.convert(
-                        sender="self", room=message.sender, reciepents=[message.room]
+                        sender="self",
+                        room=message.sender,
+                        reciepents=[message.room],
                     ),
                     message.convert(sender="self"),
                 ]
 
     def serve_user(self, user: str, start: int) -> None:
         if start != -1:
-            for message in self.user_messages.get(user, [])[start:]:
-                self.worker_queue.put((message, [user], True))
+            for message in self.user_messages.get(user, [])[
+                start:
+            ]:
+                self.worker_queue.put(
+                    (message, [user], True)
+                )
 
         while True:
             try:
                 message = self.users[user].recv()
                 if message.house == "HOME":
-                    message_list = self.handle_user_message(message)
+                    message_list = self.handle_user_message(
+                        message
+                    )
                     for message in message_list:
-                        recipients = message.take_recipients()
-                        self.worker_queue.put((message, recipients))
+                        recipients = (
+                            message.take_recipients()
+                        )
+                        self.worker_queue.put(
+                            (message, recipients)
+                        )
                 else:
-                    message_list = self.houses[message.house].process_message(message)
+                    message_list = self.houses[
+                        message.house
+                    ].process_message(message)
                     for message in message_list:
-                        recipients = message.take_recipients()
-                        self.worker_queue.put((message, recipients))
+                        recipients = (
+                            message.take_recipients()
+                        )
+                        self.worker_queue.put(
+                            (message, recipients)
+                        )
 
-            except :
+            except:
                 print(f"{user} disconnected")
                 return
 
@@ -331,7 +408,14 @@ class Server:
         Save the data when closing
         """
         with open(SERVER_DATA, "wb") as f:
-            dump((self.houses, self.user_messages, self.user_db), f)
+            dump(
+                (
+                    self.houses,
+                    self.user_messages,
+                    self.user_db,
+                ),
+                f,
+            )
 
     def close_all_connections(self):
 
@@ -348,7 +432,9 @@ class Server:
                 conn, _ = self.server.accept()
                 username = conn.recv(512).decode()
                 if username not in self.users:
-                    self.houses[username] = House(username, username)
+                    self.houses[username] = House(
+                        username, username
+                    )
                     self.user_db[username] = User(username)
                     print(f"{username} joined")
                 else:
@@ -359,7 +445,9 @@ class Server:
 
                 self.users[username] = Channel(conn)
                 Thread(
-                    target=self.serve_user, args=(username, offline_load), daemon=True
+                    target=self.serve_user,
+                    args=(username, offline_load),
+                    daemon=True,
                 ).start()
 
             except KeyboardInterrupt:

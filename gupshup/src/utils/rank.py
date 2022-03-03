@@ -4,7 +4,11 @@ class Rank:
     """
 
     def __init__(
-        self, name: str, color: str = "white", power: float = 0, icon="R"
+        self,
+        name: str,
+        color: str = "white",
+        power: float = 0,
+        icon="R",
     ) -> None:
         self.name = name
         self.color = color

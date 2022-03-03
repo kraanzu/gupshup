@@ -1,4 +1,3 @@
-from textual.widget import Widget
 from textual.widgets import TreeControl, TreeNode
 from rich.console import RenderableType
 from rich.text import Text

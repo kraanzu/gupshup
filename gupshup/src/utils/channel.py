@@ -1,7 +1,8 @@
-from struct import pack, unpack
+# from struct import pack, unpack
+# from sys import getsizeof as sizeof
+
 from socket import socket
-from sys import getsizeof as sizeof
-from pickle import dump, dumps, loads
+from pickle import dumps, loads
 from .message import Message
 
 

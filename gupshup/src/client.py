@@ -21,10 +21,14 @@ except:
 
 
 class Client:
-    def __init__(self, name: str, message_queue: Queue = Queue()) -> None:
+    def __init__(
+        self, name: str, message_queue: Queue = Queue()
+    ) -> None:
         self.name = argv[1]
         self.queue = message_queue
-        self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.conn = socket.socket(
+            socket.AF_INET, socket.SOCK_STREAM
+        )
         self.online = True
         self.setup_db()
 
@@ -72,10 +76,14 @@ class Client:
                 self.queue.put(data)
                 self.chats += (data,)
             except:
-                self.queue.put(Message(action="connection_disable"))
+                self.queue.put(
+                    Message(action="connection_disable")
+                )
                 while not self.try_reconnect():
                     pass
-                self.queue.put(Message(action="connection_enable"))
+                self.queue.put(
+                    Message(action="connection_enable")
+                )
 
     def try_reconnect(self):
         """
@@ -95,18 +103,24 @@ class Client:
 
         except OSError:
             self.conn.close()
-            self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.conn = socket.socket(
+                socket.AF_INET, socket.SOCK_STREAM
+            )
             return False
 
     def start_connection(self):
         try:
             self.conn.connect((HOST, PORT))
             self.conn.sendall(self.name.encode())
-            sleep(0.01)  # A mild delay for non-mangled recieve
+            sleep(
+                0.01
+            )  # A mild delay for non-mangled recieve
 
             self.conn.sendall(str(self.start).encode())
             self.channel = Channel(self.conn)
-            Thread(target=self.listen_from_server, daemon=True).start()
+            Thread(
+                target=self.listen_from_server, daemon=True
+            ).start()
         except:
             print("Looks like the server is down :(")
             exit()

@@ -53,7 +53,9 @@ class Message:
         """
 
         message = self.clone()
-        message.reciepents = reciepents if reciepents else [message.sender]
+        message.reciepents = (
+            reciepents if reciepents else [message.sender]
+        )
         message.action = action
         if room:
             message.room = room
@@ -67,9 +69,3 @@ class Message:
         message.data = data
 
         return message
-
-    def __repr__(self):
-        return f"sender: {self.sender}\nhouse: {self.house}\nroom: {self.room}\ntext: {self.text}"
-
-    def __str__(self):
-        return f"sender: {self.sender}\nhouse: {self.house}\nroom: {self.room}\ntext: {self.text}"
