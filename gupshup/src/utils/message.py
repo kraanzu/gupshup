@@ -53,9 +53,7 @@ class Message:
         """
 
         message = self.clone()
-        message.reciepents = (
-            reciepents if reciepents else [message.sender]
-        )
+        message.reciepents = reciepents if reciepents else [message.sender]
         message.action = action
         if room:
             message.room = room

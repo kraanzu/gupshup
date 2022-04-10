@@ -50,9 +50,7 @@ class TextInput(Widget):
             text = self._render_text_with_cursor()
         else:
             if len(self.value) == 0:
-                text = Text(
-                    self.placeholder, style="dim white"
-                )
+                text = Text(self.placeholder, style="dim white")
             else:
                 text = Text(self.value)
 
@@ -60,11 +58,8 @@ class TextInput(Widget):
             text,
             height=3,
             style=self.style or "",
-            border_style=self.border_style
-            or Style(color="blue"),
-            box=rich.box.DOUBLE
-            if self.has_focus
-            else rich.box.SQUARE,
+            border_style=self.border_style or Style(color="blue"),
+            box=rich.box.DOUBLE if self.has_focus else rich.box.SQUARE,
         )
 
     def _render_text_with_cursor(self) -> Text:
@@ -107,9 +102,7 @@ class TextInput(Widget):
     async def keypress(self, key: str) -> None:
         match key:
             case "left":
-                self._cursor_position = max(
-                    self._cursor_position - 1, 0
-                )
+                self._cursor_position = max(self._cursor_position - 1, 0)
 
             case "right":
                 self._cursor_position = min(
@@ -125,22 +118,16 @@ class TextInput(Widget):
 
             case "ctrl+h":  # Backspace
                 if self._cursor_position:
-                    self._cursor_position = max(
-                        self._cursor_position - 1, 0
-                    )
+                    self._cursor_position = max(self._cursor_position - 1, 0)
                     self.value = (
                         self.value[: self._cursor_position]
-                        + self.value[
-                            self._cursor_position + 1 :
-                        ]
+                        + self.value[self._cursor_position + 1 :]
                     )
 
             case "delete":
                 self.value = (
                     self.value[: self._cursor_position]
-                    + self.value[
-                        self._cursor_position + 1 :
-                    ]
+                    + self.value[self._cursor_position + 1 :]
                 )
 
             case "ctrl+v":

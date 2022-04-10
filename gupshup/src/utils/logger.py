@@ -21,8 +21,8 @@ def warn(message):
 
 
 def err(message):
-    console.print(f"{time_now()} [{colored('ERR ', 'red')}] | {message}")
+    console.print(f"{time_now()} [{colored('ERR', 'red')}]  | {message}")
 
 
 def debug(message):
-    console.print(f"{time_now()} [{colored('DBG ', 'cyan')}] | {message}")
+    console.print(f"{time_now()} [{colored('DBG', 'cyan')}]  | {message}")

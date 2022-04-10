@@ -15,9 +15,7 @@ class MemberList(CustomTree):
         name = Text("Members", style="bold red")
         super().__init__(
             name,
-            CustomNode(
-                type="member_root", icon="", color="red"
-            ),
+            CustomNode(type="member_root", icon="", color="red"),
         )
 
     def render_node(self, node: TreeNode) -> RenderableType:
@@ -44,19 +42,11 @@ class MemberList(CustomTree):
             "cursor": node.is_cursor,
         }
 
-        label = (
-            Text(node.label)
-            if isinstance(node.label, str)
-            else node.label
-        )
+        label = Text(node.label) if isinstance(node.label, str) else node.label
         label.stylize(node.data.color)
 
         if is_hover:
-            label.stylize(
-                "bold red"
-                if node.data.type == "member_root"
-                else "magenta"
-            )
+            label.stylize("bold red" if node.data.type == "member_root" else "magenta")
 
         icon = node.data.icon
         icon_label = (
@@ -72,24 +62,16 @@ class MemberList(CustomTree):
         return icon_label
 
     async def add_rank(self, name: str) -> None:
-        await super().add_under_root(
-            name, CustomNode(type="rank", icon="")
-        )
+        await super().add_under_root(name, CustomNode(type="rank", icon=""))
 
-    async def add_user_to_rank(
-        self, rank: str, user: str
-    ) -> None:
+    async def add_user_to_rank(self, rank: str, user: str) -> None:
         """
         Assign the user a rank
         """
 
-        await self.add_under_child(
-            rank, user, CustomNode(type="member", icon="")
-        )
+        await self.add_under_child(rank, user, CustomNode(type="member", icon=""))
 
-    async def del_from_rank(
-        self, rank: str, member: str
-    ) -> None:
+    async def del_from_rank(self, rank: str, member: str) -> None:
         """
         Deletes the user from the rank
         """
@@ -99,16 +81,12 @@ class MemberList(CustomTree):
     async def del_rank(self, rank: str) -> None:
         super().del_under_root(rank)
 
-    async def change_rank_data(
-        self, rank: str, param: str, value: str
-    ) -> None:
+    async def change_rank_data(self, rank: str, param: str, value: str) -> None:
         """
         Changes rank data like icon or color
         """
 
         super().change_data_parent(rank, param, value)
 
-    async def change_rank_name(
-        self, rank: str, name: str
-    ) -> None:
+    async def change_rank_name(self, rank: str, name: str) -> None:
         super().change_name_parent(rank, name)

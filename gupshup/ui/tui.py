@@ -60,7 +60,9 @@ class Tui(App):
             show=False,
         )
 
-        self.set_interval(0.1, self.refresh) # deal with rendering issues when toggled house tree
+        self.set_interval(
+            0.1, self.refresh
+        )  # deal with rendering issues when toggled house tree
 
     async def on_key(self, event: events.Key):
         if event.key == "enter":
