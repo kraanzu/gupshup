@@ -1,6 +1,8 @@
 from textual.widgets import TreeControl, TreeNode
 from rich.console import RenderableType
 from rich.text import Text
+
+from ...src.utils.custom_node import CustomNode
 from ...src.utils import Message
 
 
@@ -41,5 +43,5 @@ class ChatScreen(TreeControl):
 
         msg = f"{message.sender}: {message.text}"
         self.chats += f"\n{message.sender}: {message.text}"
-        await self.root.add(msg, "message")
+        await self.root.add(msg, CustomNode("message", "m"))
         self.refresh()
