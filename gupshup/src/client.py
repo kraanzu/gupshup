@@ -14,7 +14,7 @@ HOME = os.path.expanduser("~")
 
 
 try:
-    GUPSHUP_FOLDER = os.path.join(HOME,".config", "gupshup")
+    GUPSHUP_FOLDER = os.path.join(HOME, ".config", "gupshup")
     CHAT_DATA = os.path.join(GUPSHUP_FOLDER, argv[1])
 except:
     pass
@@ -22,7 +22,7 @@ except:
 
 class Client:
     def __init__(self, name: str, message_queue: Queue = Queue()) -> None:
-        self.name = argv[1]
+        self.name = name
         self.queue = message_queue
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.online = True
