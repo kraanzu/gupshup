@@ -5,7 +5,7 @@ from time import sleep
 from queue import Queue
 from threading import Thread
 from typing import Dict, List
-from .utils import Message, House, User, Channel
+from .utils import Message, House, User, Channel, warn, info, debug, err
 
 HOST = "localhost"
 PORT = 5500
@@ -400,7 +400,7 @@ class Server:
                         )
 
             except:
-                print(f"{user} disconnected")
+                info(f"{user} disconnected")
                 return
 
     def save_data(self) -> None:
@@ -426,7 +426,7 @@ class Server:
 
     def start_connection(self) -> None:
         self.server.listen()
-        print("[+]", "server is up and running")
+        info("server is up and running")
         while True:
             try:
                 conn, _ = self.server.accept()
@@ -436,10 +436,10 @@ class Server:
                         username, username
                     )
                     self.user_db[username] = User(username)
-                    print(f"{username} joined")
+                    info(f"{username} joined")
                 else:
                     self.users[username].close()
-                    print(f"{username} reconnected")
+                    info(f"{username} reconnected")
 
                 offline_load = int(conn.recv(512).decode())
 
@@ -451,11 +451,11 @@ class Server:
                 ).start()
 
             except KeyboardInterrupt:
-                print("SERVER SHUT DOWN")
+                err("SERVER SHUT DOWN")
                 break
 
             except Exception as e:
-                print(e)
+                err(e)
                 break
 
         self.save_data()
