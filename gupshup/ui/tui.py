@@ -405,30 +405,27 @@ class Tui(App):
         Handles various clicks
         """
         node = click.node
-        try:  # TODO: message clicks
-            match node.data.type:
-                case "room":
-                    if node.parent:
-                        house = str(node.parent.label)
-                        room = str(node.label)
-                        await self.update_chat_screen(
-                            house,
-                            room,
-                        )
-                case "house" | "rank":
-                    await node.toggle()
-                    self.refresh(layout=True)
+        match node.data.type:
+            case "room":
+                if node.parent:
+                    house = str(node.parent.label)
+                    room = str(node.label)
+                    await self.update_chat_screen(
+                        house,
+                        room,
+                    )
+            case "house" | "rank":
+                await node.toggle()
+                self.refresh(layout=True)
 
-                case "member":
-                    name = str(node.label)
-                    if name == self.user:
-                        return
+            case "member":
+                name = str(node.label)
+                if name == self.user:
+                    return
 
-                    await self.house_tree.add_room("HOME", name)
-                    await self.house_tree.expand_home()
-                    await self.update_chat_screen("HOME", name)
-        except:
-            pass
+                await self.house_tree.add_room("HOME", name)
+                await self.house_tree.expand_home()
+                await self.update_chat_screen("HOME", name)
 
     async def action_reset_focus(self):
         await self.headbar.focus()

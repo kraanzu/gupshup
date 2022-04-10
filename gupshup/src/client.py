@@ -14,7 +14,7 @@ HOME = os.path.expanduser("~")
 
 
 try:
-    GUPSHUP_FOLDER = os.path.join(HOME, ".gupshup")
+    GUPSHUP_FOLDER = os.path.join(HOME,".config", "gupshup")
     CHAT_DATA = os.path.join(GUPSHUP_FOLDER, argv[1])
 except:
     pass

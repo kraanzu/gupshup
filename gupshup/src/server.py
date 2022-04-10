@@ -11,7 +11,7 @@ HOST = "localhost"
 PORT = 5500
 
 HOME = os.path.expanduser("~")
-SERVER_DATA = os.path.join(HOME, ".gupshup", "server_data")
+SERVER_DATA = os.path.join(HOME, ".config", "gupshup", "server_data")
 
 
 class Server:
@@ -28,7 +28,7 @@ class Server:
 
         # READS THE OFFLINE DATA PRESENT
         try:
-            os.mkdir(os.path.join(HOME, ".gupshup"))
+            os.mkdir(os.path.join(HOME, ".config", "gupshup"))
         except:
             pass
 
