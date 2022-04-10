@@ -60,6 +60,8 @@ class Tui(App):
             show=False,
         )
 
+        self.set_interval(0.1, self.refresh) # deal with rendering issues when toggled house tree
+
     async def on_key(self, event: events.Key):
         if event.key == "enter":
             await self.action_send_message()
@@ -136,15 +138,7 @@ class Tui(App):
 
         if not local:  # check if local/offline data is not being pushed
             if self.current_screen == screen:
-                # await self.chat_scroll.update(
-                #     self.chat_screen[screen].chats, home=False
-                # )
                 self.chat_screen[self.current_screen].refresh(layout=True)
-                # self.chat_scroll.animate(
-                #     "y",
-                #     self.chat_scroll.max_scroll_y + self.chat_scroll.y,
-                #     easing="none",
-                # )
             else:
                 if not self.house_tree.is_room_silent(message.house, message.room):
                     self.console.bell()
@@ -257,7 +251,6 @@ class Tui(App):
 
         self.banner = Banner()
         self.chat_screen = defaultdict(ChatScreen)
-        # self.chat_scroll = ScrollView(gutter=(0, 1))
         self.chat_scroll = defaultdict(ScrollView)
 
         self.house_tree = HouseTree()
@@ -320,13 +313,6 @@ class Tui(App):
                 gutter=(0, 1),
             )
 
-        # await self.chat_scroll.update(
-        #     self.chat_screen[self.current_screen].chats,
-        #     home=False
-        #     # (home = False) so that it doesn't scroll back each and every time when updated
-        # )
-
-        # self.member_list_scroll = ScrollView(self.member_lists[self.current_house])
         if self.current_house not in self.member_scrolls:
             self.member_scrolls[self.current_house] = ScrollView(
                 self.member_lists[self.current_house]
@@ -417,7 +403,7 @@ class Tui(App):
         Handles various clicks
         """
         node = click.node
-        try: # TODO: message clicks
+        try:  # TODO: message clicks
             match node.data.type:
                 case "room":
                     if node.parent:

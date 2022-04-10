@@ -23,10 +23,11 @@ class ChatScreen(TreeControl):
 
         label = Text.from_markup(str(node.label))
         if node.id == self.hover_node:
-            label.append(" <=")
+            # label.append(" <=")
             label.stylize("bold")
 
         label.apply_meta(meta)
+
         return label
 
     async def clear_chat(self):
