@@ -1,5 +1,7 @@
 import os
 from queue import Queue
+from rich.align import Align
+from rich.text import Text
 from textual import events
 from sys import argv
 from collections import defaultdict
@@ -17,7 +19,7 @@ from .widgets import (
 )
 
 from ..src import Client
-from ..src.utils import Message, HouseData
+from ..src.utils import Message, HouseData, HELP_TEXT
 
 
 def percent(percent, total):
@@ -31,8 +33,6 @@ class Tui(App):
 
     async def on_load(self, _: events.Load) -> None:
 
-        # INITS
-
         # client related
         self.queue = Queue()
         self.user = argv[1]
@@ -42,6 +42,7 @@ class Tui(App):
         self.current_house = "HOME"
         self.current_room = "general"
         self.current_screen = f"{self.current_house}/{self.current_room}"
+        self.help_menu_loaded = False
 
         self.member_lists: dict[str, MemberList] = defaultdict(MemberList)
         self.member_scrolls: dict[str, ScrollView] = defaultdict(ScrollView)
@@ -64,8 +65,39 @@ class Tui(App):
             0.1, self.refresh
         )  # deal with rendering issues when toggled house tree
 
+    async def load_help_menu(self):
+        banner = """
+        ┬ ┬┌─┐┬  ┌─┐  ┌┬┐┌─┐┌┐┌┬ ┬
+        ├─┤├┤ │  ├─┘  │││├┤ ││││ │
+        ┴ ┴└─┘┴─┘┴    ┴ ┴└─┘┘└┘└─┘
+        """
+        await self._clear_screen()
+        await self.view.dock(
+            Static(Align.center(Text(banner, style="magenta"), vertical="middle")),
+            size=percent(20, os.get_terminal_size()[1]),
+        )
+        await self.view.dock(
+            Static(
+                Align.center(
+                    Text("-- Press ctrl+p to exit --", style="bold magenta"),
+                    vertical="middle",
+                )
+            ),
+            edge="bottom",
+            size=percent(10, os.get_terminal_size()[1]),
+        )
+        await self.view.dock(ScrollView(Align.center(HELP_TEXT)))
+
     async def on_key(self, event: events.Key):
-        if event.key == "enter":
+        if event.key == "ctrl+p":
+            if self.help_menu_loaded:
+                await self.refresh_screen()
+            else:
+                await self.load_help_menu()
+
+            self.help_menu_loaded = not self.help_menu_loaded
+
+        elif event.key == "enter":
             await self.action_send_message()
         else:
             if self.input_box.has_focus:
