@@ -3,14 +3,18 @@ from rich.console import RenderableType
 from textual.widgets import TreeNode
 
 from .custom_tree import CustomTree
-from ...src.utils import CustomNode
+from ...src.utils import CustomNode, Parser
+
+theme = Parser()
 
 
 class HouseTree(CustomTree):
     def __init__(self) -> None:
-        name = Text("House Tree", style="bold red")
+        name = Text("House Tree", style=theme.get_data("house_tree_root"))
         self.selected = ["HOME", "general"]
-        super().__init__(name, CustomNode(type="house_root", icon=""))
+        super().__init__(
+            name, CustomNode(type="house_root", icon=theme.get_data("house_tree_icon"))
+        )
 
     def render_node(self, node: TreeNode) -> RenderableType:
         return self.render_tree_label(

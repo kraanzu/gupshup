@@ -5,7 +5,16 @@ from time import sleep
 from queue import Queue
 from threading import Thread
 from typing import Dict, List
-from .utils import Message, House, User, Channel, warn, info, debug, err
+from .utils import (
+    Message,
+    House,
+    User,
+    Channel,
+    warn,
+    info,
+    debug,
+    err,
+)
 
 HOST = "localhost"
 PORT = 5500

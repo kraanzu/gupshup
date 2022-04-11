@@ -4,6 +4,8 @@ from rich.console import RenderableType
 from rich.panel import Panel
 from textual import events
 
+from ...src.utils import Parser
+
 
 class Headbar(Header):
     """
@@ -11,7 +13,9 @@ class Headbar(Header):
     """
 
     def __init__(self):
-        super().__init__(tall=False, style="magenta on black")
+        HEADER_BG = Parser().get_data("header_bg")
+        HEADER_FG = Parser().get_data("header_fg")
+        super().__init__(tall=False, style=f"{HEADER_FG} on {HEADER_BG}")
         self.status = " Online"
 
     def watch_status(self, _: str):

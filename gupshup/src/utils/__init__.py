@@ -5,6 +5,7 @@ from .rank import Rank
 from .user import User
 from .custom_node import CustomNode
 from .logger import warn, info, debug, err
+from .parser import Parser
 
 __all__ = [
     "House",
@@ -14,6 +15,7 @@ __all__ = [
     "Rank",
     "User",
     "CustomNode",
+    "Parser",
     "warn",
     "info",
     "debug",

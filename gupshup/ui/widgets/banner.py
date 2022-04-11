@@ -4,6 +4,8 @@ from rich.panel import Panel
 from rich.text import Text
 from textual.widget import Widget
 
+from ...src.utils import Parser
+
 
 class Banner(Widget):
     """
@@ -13,7 +15,7 @@ class Banner(Widget):
     text = Text("HOME/general", style="bold blue")
 
     def set_text(self, text: str):
-        self.text = Text(text, style="bold blue")
+        self.text = Text(text, style=Parser().get_data("banner_fg"))
         self.refresh()
 
     def render(self) -> RenderableType:

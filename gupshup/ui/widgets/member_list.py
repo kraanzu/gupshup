@@ -3,7 +3,9 @@ from rich.console import RenderableType
 from textual.widgets import TreeNode
 
 from .custom_tree import CustomTree
-from ...src.utils import CustomNode
+from ...src.utils import CustomNode, Parser
+
+theme = Parser()
 
 
 class MemberList(CustomTree):
@@ -12,10 +14,12 @@ class MemberList(CustomTree):
     """
 
     def __init__(self) -> None:
-        name = Text("Members", style="bold red")
+        name = Text("Members", style=theme.get_data("member_tree_root"))
         super().__init__(
             name,
-            CustomNode(type="member_root", icon="", color="red"),
+            CustomNode(
+                type="member_root", icon=theme.get_data("member_tree_icon"), color="red"
+            ),
         )
 
     def render_node(self, node: TreeNode) -> RenderableType:

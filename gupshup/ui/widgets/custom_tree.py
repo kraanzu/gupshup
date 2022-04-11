@@ -5,7 +5,7 @@ from textual.widgets import (
     TreeNode,
 )
 from textual.reactive import Reactive
-from ...src.utils import CustomNode
+from ...src.utils import CustomNode, Parser
 
 
 class CustomTree(TreeControl):
@@ -29,7 +29,7 @@ class CustomTree(TreeControl):
     async def watch_hover_node(self, hover_node: NodeID) -> None:
         for node in self.nodes.values():
             node.tree.guide_style = (
-                "bold not dim red" if node.id == hover_node else "black"
+                Parser().get_data("branch_hover") if node.id == hover_node else "black"
             )
         self.refresh(layout=True)
 
