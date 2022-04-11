@@ -54,6 +54,9 @@ class CustomTree(TreeControl):
 
     def del_under_root(self, name: str):
         index = self.get_node_index(self.root, name)
+        if index == -1:
+            return
+
         self.root.children.pop(index)
         self.root.tree.children.pop(index)
         self.refresh()

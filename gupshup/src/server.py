@@ -158,8 +158,14 @@ class Server:
         Create your brand new house
         """
 
-        param = message.text[11:]
-        if param in self.houses:
+        param = message.text[11:].strip()
+        if not param:
+            return [
+                message.convert(
+                    text="The house must have a name",
+                )
+            ]
+        elif param in self.houses:
             return [
                 message.convert(
                     text="There is already a house with same name",
@@ -175,7 +181,7 @@ class Server:
                 )
             ]
 
-    def general_ban(self, message) -> List[Message]:
+    def general_ban(self, message: Message) -> List[Message]:
         """
         ban/block a user from texting you
         """
@@ -188,8 +194,9 @@ class Server:
                 ),
             ]
         elif self.user_db[message.sender].has_banned(param):
-            return message.covert(text="this user is already banned")
+            return [message.convert(text="this user is already banned")]
         else:
+            debug(f"{message.sender} banned {param}")
             self.user_db[message.sender].ban_user(param)
             return [
                 message.convert(
@@ -197,14 +204,15 @@ class Server:
                 )
             ]
 
-    def general_unban(self, message) -> List[Message]:
+    def general_unban(self, message: Message) -> List[Message]:
         """
         ban/block a user from texting you
         """
 
         param = message.text[7:].strip()
         if not self.user_db[message.sender].has_banned(param):
-            return message.covert(text="this user is not banned by you")
+            return [message.convert(text="this user is not banned by you")]
+
         else:
             self.user_db[message.sender].unban_user(param)
             return [
@@ -240,9 +248,15 @@ class Server:
         """
         # NOTE: the other ban provides the functionality to ban a user before he can message you
         # this ban just has the convinience to ban the user just by writing /ban in the chat
+        message.text = f"/ban {message.room}"
+        return self.general_ban(message)
 
-        self.user_db[message.sender].ban_user(message.room)
-        return []
+    def action_unban(self, message: Message) -> List[Message]:
+        """
+        Unban user
+        """
+        message.text = f"/unban {message.room}"
+        return self.general_unban(message)
 
     def action_toggle_silent(self, message: Message) -> List[Message]:
         """
@@ -277,7 +291,8 @@ class Server:
                 cmd = f"self.general_{action}(message)"
                 return eval(cmd)
 
-            except AttributeError:
+            except AttributeError as e:
+                err(e)
                 return [
                     message.convert(
                         text="[red]No such command! See help menu by pressing ctrl-h[/red]",
@@ -300,15 +315,24 @@ class Server:
                         cmd = f"self.action_{action}(message)"
                         return eval(cmd)
 
-                    except AttributeError:
+                    except AttributeError as e:
+                        err(e)
                         return [
                             message.convert(
                                 text="[red]No such command! See help menu by pressing ctrl-h[/red]",
                             )
                         ]
 
-                elif self.user_db[message.room].has_banned(message.sender):
-                    return [message.convert(sender="self")]
+                if self.user_db[message.room].has_banned(message.sender):
+                    x = []
+                else:
+                    x = (
+                        message.convert(
+                            sender="self",
+                            room=message.sender,
+                            reciepents=[message.room],
+                        ),
+                    )
 
                 return [
                     message.convert(
@@ -316,11 +340,7 @@ class Server:
                         data={"room": message.sender},
                         reciepents=[message.room],
                     ),
-                    message.convert(
-                        sender="self",
-                        room=message.sender,
-                        reciepents=[message.room],
-                    ),
+                    *x,
                     message.convert(sender="self"),
                 ]
 
@@ -343,7 +363,8 @@ class Server:
                         recipients = message.take_recipients()
                         self.worker_queue.put((message, recipients))
 
-            except:
+            except Exception as e:
+                err(e)
                 info(f"{user} disconnected")
                 return
 

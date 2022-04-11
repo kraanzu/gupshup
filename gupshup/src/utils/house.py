@@ -72,6 +72,9 @@ class House:
         self.rooms.remove(name)
 
     def ban_user(self, name: str) -> None:
+        if name in self.members:
+            self.members.remove(name)
+
         self.banned_users.add(name)
 
     def unban_user(self, name: str) -> None:
@@ -322,7 +325,17 @@ class House:
             message.convert(
                 text=f"user {user} was banned by {message.sender}",
                 reciepents=list(self.members),
-            )
+            ),
+            message.convert(
+                action="del_house",
+                reciepents=[user],
+            ),
+            message.convert(
+                text=f"You were banned from {self.name} by {message.sender}",
+                house="HOME",
+                room="general",
+                reciepents=[user],
+            ),
         ]
 
     def action_unban(self, message: Message) -> List[Message]:
