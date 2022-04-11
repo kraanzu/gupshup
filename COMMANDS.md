@@ -53,4 +53,4 @@ There are two types of houses
 | change_room_name    |  Change a room's name                                                                                | /change_room_name  (room) (name)      |
 | change_room_icon    |  Change a room's icon                                                                                | /change_room_icon  (room) (icon)      |
 | change_command_power|  Change a command's power level                                                                      | /change_command_power (commad) (power)|
-| bye                 |  Leave the house                                                                                     | /change_command_power (commad) (power)|
+| bye                 |  Leave the house                                                                                     | /bye|
