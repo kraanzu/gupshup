@@ -323,6 +323,14 @@ class Server:
                             )
                         ]
 
+                if self.user_db[message.sender].has_banned(message.room):
+                    return [
+                        message.convert(
+                            text="You have banned this user "
+                            + f"to unban type /unban {message.room}"
+                        )
+                    ]
+
                 if self.user_db[message.room].has_banned(message.sender):
                     x = []
                 else:
