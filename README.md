@@ -25,7 +25,7 @@ python -m pip install git+https://github.com/kraanzu/gupshup.git
 ## Or if you prefer Manual Installation
 ``` bash
 git clone https://github.com/kraanzu/gupshup.git
-cd termtyper
+cd gupshup
 pip install .
 ```
 
@@ -46,7 +46,6 @@ gupshup <username>
 ```
 
 # TODOs
-- [ ] User-based theming
 - [ ] Add bots
 - [ ] File Uploads
 
