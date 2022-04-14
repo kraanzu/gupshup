@@ -121,6 +121,13 @@ class House:
             ),
             Message(
                 action="push_text",
+                house="HOME",
+                room="general",
+                text=f"You now have joined `{self.name}`",
+                reciepents=[user],
+            ),
+            Message(
+                action="push_text",
                 sender="SERVER",
                 house=self.name,
                 room="general",
@@ -198,6 +205,7 @@ class House:
                 house="HOME",
                 room="general",
                 text=kick_message(self.name),
+                reciepents=[member],
             ),
         ]
 
