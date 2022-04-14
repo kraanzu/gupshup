@@ -235,6 +235,13 @@ class Server:
 
         return [message.convert(action="clear_chat")]
 
+    def general_archive(self, message: Message) -> List[Message]:
+        to_archive = message.text[9:].strip()
+        if not to_archive:
+            return [message.convert("A name should be provided to archive")]
+
+        return [message.convert(action="archive")]
+
     # ----------------------- END OF HOME/general FUNCTIONS ---------------------------------
 
     # +--------------------------------+
@@ -276,6 +283,10 @@ class Server:
         Delete the chat along with the room
         """
         return [message.convert(action="del_room")]
+
+    def action_archive(self, message: Message) -> List[Message]:
+        message.text = f"/archive {message.room}"
+        return self.general_archive(message)
 
     # ----------------------- END OF HOME/!general FUNCTIONS ---------------------------------
 
