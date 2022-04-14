@@ -251,7 +251,10 @@ class House:
 
     def action_add_room(self, message: Message) -> List[Message]:
         params = message.text[10:].split()
-        room = params[0]
+        if not params:
+            return [message.convert(text="the room must have a name")]
+
+        room = params[0].strip()
         if room in self.rooms:
             return [message.convert(text="There is already a room with same name!")]
 
@@ -267,9 +270,7 @@ class House:
         if len(params) > 1:
             x.append(
                 message.convert(
-                    action="change_room_icon",
-                    room=room,
-                    text=params[1],
+                    action="change_room_icon", room=room, data={"icon": params[1]}
                 )
             )
 
@@ -406,6 +407,7 @@ class House:
                 message.convert(
                     action="change_rank_color",
                     data={"rank": rank, "color": params[1]},
+                    reciepents=list(self.members),
                 ),
             )
             self.ranks[rank].color = params[1]
@@ -415,6 +417,7 @@ class House:
                 message.convert(
                     action="change_rank_icon",
                     data={"rank": rank, "icon": params[2]},
+                    reciepents=list(self.members),
                 ),
             )
             self.ranks[rank].icon = params[2]

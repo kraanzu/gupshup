@@ -188,13 +188,17 @@ class Tui(App):
         if screen == self.current_screen:
             self.chat_screen[screen].refresh()
 
-    async def perform_del_room(self, message: Message) -> None:
+    async def perform_archive(self, message: Message) -> None:
         screen = f"{message.house}/{message.room}"
 
         self.house_tree.del_room(message.house, message.room)
-        self.chat_screen[screen].chats = ""
         if self.current_screen == screen:
             await self.update_chat_screen(message.house, "general")
+
+    async def perform_del_room(self, message: Message) -> None:
+        screen = f"{message.house}/{message.room}"
+        await self.chat_screen[screen].clear_chat()
+        await self.perform_archive(message)
 
     async def perform_del_house(self, message: Message) -> None:
         self.house_tree.del_house(message.house)
