@@ -55,6 +55,11 @@ home_cmds = [
         "/del_chat [name]",
     ],
     [
+        "archive",
+        "This is a bit different from del_room. delete_room deletes the chat and hides the room from `HOME` but archive does  not delete the chat",
+        "/archive [name]",
+    ],
+    [
         "toggle_silent",
         "You won't hear a notification bell if this user texts you",
         "/toggle_silent [name]",
