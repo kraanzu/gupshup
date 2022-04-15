@@ -134,9 +134,14 @@ house_cmds = [
         "/assign_rank (name) (rank)",
     ],
     [
-        "toggle_silent",
-        "You won't hear a notification bell if this user texts you",
-        "/toggle_silent [name]",
+        "rank_info",
+        "Displays a rank's info",
+        "/rank_info (rank)",
+    ],
+    [
+        "rank_levels",
+        "Displays all rank's with their power levels",
+        "/rank_levels",
     ],
     [
         "change_rank_color",
@@ -154,6 +159,16 @@ house_cmds = [
         "/change_rank_name (rank) (name)",
     ],
     [
+        "change_rank_power",
+        "Change a rank's power",
+        "/change_rank_power (rank) (power)",
+    ],
+    [
+        "add_rank_desc",
+        "Add a rank's description",
+        "/add_rank_desc (rank) (desc)",
+    ],
+    [
         "change_room_name",
         "Change a room's name",
         "/change_room_name (room) (name)",
@@ -167,6 +182,11 @@ house_cmds = [
         "change_command_power",
         "Change a command's power level",
         "/change_command_power (commad) (power)",
+    ],
+    [
+        "destroy",
+        "Destroys the house",
+        "/destroy",
     ],
     [
         "bye",
