@@ -32,8 +32,8 @@ There are two types of houses
 1 - Only available in private Houses
 </pre>
 
-| Command             | Action                                                                                               |  Syntax                               |
-|:-------------------:|:-----------------------------------------------------------------------------------------------------|-------------------------------------- |
+| Command             | Action                                                                                               |  Syntax                   |
+|:-------------------:|:-----------------------------------------------------------------------------------------------------|---------------------------|
 | clear_chat          |  Allows you to clear the chat with the user the user will stay in direct chats                       | /clear_chat                           |
 | add_room            |  Adds a new room to the house                                                                        | /add_room (name) [icon]               |
 | del_room            |  Deletes the specified room                                                                          | /del_room (name)                      |
@@ -43,6 +43,7 @@ There are two types of houses
 | unban               |  Allows you to unban a banned user                                                                   | /unban (username)                     |
 | kick                |  Kick the user from the house                                                                        | /kick (name)                          |
 | toggle_type         |  Toggle's the group type between open and private                                                    | /toggle_type                          |
+| toggle_silent         |  Toggle's the rooms silence                                                     | /toggle_silent                          |
 | accept<sup>1</sup>  |  Accept a user's request to join the group                                                           | /accept (name)                        |
 | reject<sup>1</sup>  |  Reject a user's request to join the group                                                           | /reject (name)                        |
 | add_rank            |  Add a new rank in the house                                                                         | /add_rank (name) [color] [icon]       |
