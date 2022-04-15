@@ -494,6 +494,15 @@ class House:
         self.ranks[rank].desc = desc
         return []
 
+    def action_rank_levels(self, message: Message) -> List[Message]:
+        text = "\nThe available ranks are:\n[dim black][/dim black]"
+        for rank in self.ranks.values():
+            text += f"[{rank.color}]{rank.name}[/{rank.color}] -> {rank.power}\n"
+
+        text += "\nFor more info about ranks check `/rank_info <>`\n"
+
+        return [message.convert(text=text)]
+
     def action_change_rank_icon(self, message: Message) -> List[Message]:
         param = message.text[18:].strip()
         rank, icon = param.split(" ", 1)
