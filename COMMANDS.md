@@ -40,8 +40,7 @@ There are two types of houses
 | mute                |  Mutes the specified user.. his text will reach nobody                                               | /mute (name)                          |
 | unmute              |  Unmutes a muted user                                                                                | /unmute (name)                        |
 | ban                 |  Allows you to ban a user so they won't be able to enter the house                                   | /ban (name)                           |
-| unban               |  Allows you to unban a banned user                                                                   | /unban
-(username)                     |
+| unban               |  Allows you to unban a banned user                                                                   | /unban (username)                     |
 | kick                |  Kick the user from the house                                                                        | /kick (name)                          |
 | toggle_type         |  Toggle's the group type between open and private                                                    | /toggle_type                          |
 | accept<sup>1</sup>  |  Accept a user's request to join the group                                                           | /accept (name)                        |
@@ -49,10 +48,15 @@ There are two types of houses
 | add_rank            |  Add a new rank in the house                                                                         | /add_rank (name) [color] [icon]       |
 | del_rank            |  Delete a rank from the house                                                                        | /del_rank  (name)                     |
 | assign_rank         |  Assign a rank to a user                                                                             | /assign_rank (name) (rank)            |
-| change_rank_color   |  Change a rannk's color                                                                              | /change_rank_color (rank) (color)     |
+| rank_info   |  Displays a rank's info                                                                              | /rank_info (rank)      |
+| rank_levels   |  Displays all rank's with their power levels                                                                              | /rank_info (rank)      |
+| change_rank_color   |  Change a rank's color                                                                              | /change_rank_color (rank) (color)     |
 | change_rank_icon    |  Change a rank's icon                                                                                | /change_rank_icon  (rank) (icon)      |
 | change_rank_name    |  Change a rank's name                                                                                | /change_rank_name  (rank) (name)      |
+| change_rank_power    |  Change a rank's power                                                                                | /change_rank_power  (rank) (power)      |
+| add_rank_desc            |  Add a rank description                                                                         | /add_rank_desc (name) (desc) |
 | change_room_name    |  Change a room's name                                                                                | /change_room_name  (room) (name)      |
 | change_room_icon    |  Change a room's icon                                                                                | /change_room_icon  (room) (icon)      |
 | change_command_power|  Change a command's power level                                                                      | /change_command_power (commad) (power)|
+| destroy                 |  Destroys the house                                                                                     | /destroy|
 | bye                 |  Leave the house                                                                                     | /bye|
