@@ -5,8 +5,6 @@ from textual.widgets import TreeNode
 from .custom_tree import CustomTree
 from ...src.utils import CustomNode, Parser
 
-theme = Parser()
-
 
 class MemberList(CustomTree):
     """
@@ -14,6 +12,7 @@ class MemberList(CustomTree):
     """
 
     def __init__(self) -> None:
+        theme = Parser()
         name = Text("Members", style=theme.get_data("member_tree_root"))
         super().__init__(
             name,

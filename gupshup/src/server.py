@@ -52,7 +52,7 @@ class Server:
             self.houses: Dict[str, House] = dict()
             self.user_messages: Dict[str, List[Message]] = dict()
             self.user_db: Dict[str, User] = dict()
-            self.save_data()
+            # self.save_data()
 
         Thread(target=self._execute_queue, daemon=True).start()
 

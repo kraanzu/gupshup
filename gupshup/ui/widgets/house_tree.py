@@ -5,11 +5,10 @@ from textual.widgets import TreeNode
 from .custom_tree import CustomTree
 from ...src.utils import CustomNode, Parser
 
-theme = Parser()
-
 
 class HouseTree(CustomTree):
     def __init__(self) -> None:
+        theme = Parser()
         name = Text("House Tree", style=theme.get_data("house_tree_root"))
         self.selected = ["HOME", "general"]
         super().__init__(

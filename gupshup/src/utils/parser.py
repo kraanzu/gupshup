@@ -34,7 +34,6 @@ class Parser(ConfigParser):
             self._create_user_config()
 
     def _create_user_config(self) -> None:
-        print("No config found !\nCreating one....")
         try:
             home = os.path.expanduser("~")
             os.mkdir(os.path.join(home, ".config", "gupshup"))
