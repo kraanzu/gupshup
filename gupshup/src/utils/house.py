@@ -475,9 +475,6 @@ class House:
             ),
         ]
 
-    def action_list_ranks(self, message: Message) -> List[Message]:
-        return [message.convert(text=f"The ranks are: {', '.join(self.ranks)}")]
-
     def action_rank_info(self, message: Message) -> List[Message]:
         rank = message.text[11:].strip()
         if rank not in self.ranks:
