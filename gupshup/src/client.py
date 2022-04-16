@@ -1,6 +1,5 @@
 import os
 import socket
-from sys import argv
 from threading import Thread
 from queue import Queue
 from time import sleep
@@ -13,19 +12,14 @@ PORT = 5500
 HOME = os.path.expanduser("~")
 
 
-try:
-    GUPSHUP_FOLDER = os.path.join(HOME, ".config", "gupshup")
-    CHAT_DATA = os.path.join(GUPSHUP_FOLDER, argv[1])
-except:
-    pass
-
-
 class Client:
     def __init__(self, name: str, message_queue: Queue = Queue()) -> None:
         self.name = name
         self.queue = message_queue
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.online = True
+        self.GUPSHUP_FOLDER = os.path.join(HOME, ".config", "gupshup")
+        self.CHAT_DATA = os.path.join(self.GUPSHUP_FOLDER, self.name)
         self.setup_db()
 
     def setup_db(self) -> None:
@@ -35,16 +29,16 @@ class Client:
         """
 
         try:
-            os.mkdir(GUPSHUP_FOLDER)
+            os.mkdir(self.GUPSHUP_FOLDER)
         except:
             pass
 
         try:
-            with open(CHAT_DATA, "rb") as f:
+            with open(self.CHAT_DATA, "rb") as f:
                 self.chats = load(f)
         except:
             self.chats = []
-            with open(CHAT_DATA, "wb") as f:
+            with open(self.CHAT_DATA, "wb") as f:
                 dump(self.chats, f)
 
         self.start = len(self.chats)
@@ -53,7 +47,7 @@ class Client:
         """
         Save the chats before closing the application
         """
-        with open(CHAT_DATA, "wb") as f:
+        with open(self.CHAT_DATA, "wb") as f:
             dump(self.chats, f)
 
     def send(self, message: Message) -> None:
