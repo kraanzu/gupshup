@@ -252,7 +252,7 @@ textual = "^0.1.15"
 type = "git"
 url = "https://github.com/kraanzu/textual_extras.git"
 reference = "main"
-resolved_reference = "559415dc1002e3590ef1c658e31e527dae0dd24b"
+resolved_reference = "9c6996405e75674b8fbc60a9087cbf2014259ab2"
 
 [[package]]
 name = "toml"
