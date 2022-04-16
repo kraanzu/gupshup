@@ -37,12 +37,12 @@ A script be automatically generated to run it with a simple command gupshup in y
 
 **For spinning up a server:**
 ```bash
-gupshup server
+gupshup --server
 ```
 
 **For connecting to a server:**
 ```bash
-gupshup <username>
+gupshup -u <username>
 ```
 
 # TODOs
