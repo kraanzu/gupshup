@@ -19,4 +19,4 @@ def main():
         server = Server()
         server.start_connection()
     else:
-        Tui(args.user).run(args.user)
+        Tui.run(args.user, args.quiet)

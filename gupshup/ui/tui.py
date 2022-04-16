@@ -38,6 +38,7 @@ class Tui(App):
     def __init__(
         self,
         user: str,
+        quiet: bool = False,
         screen: bool = True,
         driver_class: Type[Driver] | None = None,
         log: str = "",
@@ -52,11 +53,13 @@ class Tui(App):
             title=title,
         )
         self.user = user
+        self.quiet = quiet
 
     @classmethod
     def run(
         cls,
         user,
+        quiet,
         console: Console = None,
         screen: bool = True,
         driver: Type[Driver] = None,
@@ -71,7 +74,9 @@ class Tui(App):
         """
 
         async def run_app() -> None:
-            app = cls(user=user, screen=screen, driver_class=driver, **kwargs)
+            app = cls(
+                user=user, quiet=quiet, screen=screen, driver_class=driver, **kwargs
+            )
             await app.process_messages()
 
         asyncio.run(run_app())
@@ -221,7 +226,10 @@ class Tui(App):
             if self.current_screen == screen:
                 self.chat_screen[self.current_screen].refresh(layout=True)
             else:
-                if not self.house_tree.is_room_silent(message.house, message.room):
+                if (
+                    not self.house_tree.is_room_silent(message.house, message.room)
+                    and not self.quiet
+                ):
                     notify()
 
                 self.house_tree.increase_pending(message.house, message.room)
