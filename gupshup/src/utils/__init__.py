@@ -7,6 +7,7 @@ from .custom_node import CustomNode
 from .logger import warn, info, debug, err
 from .parser import Parser
 from .help import HELP_TEXT
+from .notification import notify
 
 
 __all__ = [
@@ -23,4 +24,5 @@ __all__ = [
     "debug",
     "err",
     "HELP_TEXT",
+    "notify",
 ]

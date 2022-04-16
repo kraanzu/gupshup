@@ -19,7 +19,7 @@ from .widgets import (
 )
 
 from ..src import Client
-from ..src.utils import Message, HouseData, HELP_TEXT
+from ..src.utils import Message, HouseData, HELP_TEXT, notify
 
 
 def percent(percent, total):
@@ -175,7 +175,7 @@ class Tui(App):
                 self.chat_screen[self.current_screen].refresh(layout=True)
             else:
                 if not self.house_tree.is_room_silent(message.house, message.room):
-                    self.console.bell()
+                    notify()
 
                 self.house_tree.increase_pending(message.house, message.room)
 
