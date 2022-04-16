@@ -334,7 +334,7 @@ class Tui(App):
     async def on_mount(self, _: events.Mount) -> None:
         y = os.get_terminal_size()[1]
 
-        self.title = "Welcome to Gupshup"
+        self.title = "Gupshup"
         self.headbar = Headbar()
         self.input_box = TextInput(
             placeholder=Text("Say something here...", style="dim white")
@@ -363,6 +363,8 @@ class Tui(App):
         Populates the app with offline data stored in the system
         """
 
+        self.title = "Loading offline data ... "
+        self.refresh()
         for message in self.client.chats:
             if message.action == "push_text":
                 await self.perform_push_text(message, local=True)
@@ -371,6 +373,9 @@ class Tui(App):
 
         self.client.start_connection()
         self.set_interval(0.1, self.server_listen)
+
+        self.title = "Gupshup"
+        self.refresh()
 
     async def on_resize(self, _: events.Resize) -> None:
         await self.refresh_screen()
