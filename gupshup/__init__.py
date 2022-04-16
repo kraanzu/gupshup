@@ -7,7 +7,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "-q", "--quiet", default=0, action="store_true", help="Supress notification sounds"
 )
-group = parser.add_mutually_exclusive_group()
+group = parser.add_mutually_exclusive_group(required=True)
 group.add_argument("--server", action="store_true", help="Spins up a server")
 group.add_argument("-u", "--user", type=str, help="Connects a user to the server")
 
