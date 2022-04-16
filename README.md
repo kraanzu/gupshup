@@ -42,7 +42,12 @@ gupshup --server
 
 **For connecting to a server:**
 ```bash
-gupshup -u <username>
+gupshup -u <username> 
+```
+
+**Note: You can add -q flag to supress notification sounds**
+```bash
+gupshup -u <username> -q 
 ```
 
 # TODOs
