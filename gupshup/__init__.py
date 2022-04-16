@@ -1,26 +1,22 @@
-import sys
 from .ui import Tui
 from .src.server import Server
 
-USAGE = """
-# USAGE:
-----------
+import argparse
 
-for server:
-gupshup server
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "-q", "--quiet", default=0, action="store_true", help="Supress notification sounds"
+)
+group = parser.add_mutually_exclusive_group()
+group.add_argument("--server", action="store_true", help="Spins up a server")
+group.add_argument("-u", "--user", type=str, help="Connects a user to the server")
 
-for user:
-gupshup <username>
-"""
+args = parser.parse_args()
 
 
 def main():
-    if len(sys.argv) > 1:
-        if sys.argv[1].lower() == "server":
-            server = Server()
-            server.start_connection()
-        else:
-            app = Tui()
-            app.run()
+    if args.server:
+        server = Server()
+        server.start_connection()
     else:
-        print(USAGE)
+        Tui(args.user).run(args.user)

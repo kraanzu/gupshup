@@ -1,14 +1,19 @@
 import os
+import asyncio
+from collections import defaultdict
 from queue import Queue
+from typing import Type
+
+from rich.console import Console
 from rich.align import Align
 from rich.text import Text
-from textual import events
-from sys import argv
-from collections import defaultdict
 
+from textual import events
+from textual.driver import Driver
 from textual.app import App
 from textual.layouts.dock import DockLayout
 from textual.widgets import ScrollView, TreeClick, Static
+
 from .widgets import (
     Headbar,
     ChatScreen,
@@ -17,7 +22,6 @@ from .widgets import (
     MemberList,
     Banner,
 )
-
 from ..src import Client
 from ..src.utils import Message, HouseData, HELP_TEXT, notify
 
@@ -31,11 +35,51 @@ class Tui(App):
     The UI Class for Gupshup
     """
 
+    def __init__(
+        self,
+        user: str,
+        screen: bool = True,
+        driver_class: Type[Driver] | None = None,
+        log: str = "",
+        log_verbosity: int = 1,
+        title: str = "Textual Application",
+    ):
+        super().__init__(
+            screen=screen,
+            driver_class=driver_class,
+            log=log,
+            log_verbosity=log_verbosity,
+            title=title,
+        )
+        self.user = user
+
+    @classmethod
+    def run(
+        cls,
+        user,
+        console: Console = None,
+        screen: bool = True,
+        driver: Type[Driver] = None,
+        **kwargs,
+    ):
+        """Run the app.
+
+        Args:
+            console (Console, optional): Console object. Defaults to None.
+            screen (bool, optional): Enable application mode. Defaults to True.
+            driver (Type[Driver], optional): Driver class or None for default. Defaults to None.
+        """
+
+        async def run_app() -> None:
+            app = cls(user=user, screen=screen, driver_class=driver, **kwargs)
+            await app.process_messages()
+
+        asyncio.run(run_app())
+
     async def on_load(self, _: events.Load) -> None:
 
         # client related
         self.queue = Queue()
-        self.user = argv[1]
         self.client = Client(self.user, self.queue)
 
         # sets up default screen
@@ -64,6 +108,9 @@ class Tui(App):
         self.set_interval(
             0.1, self.refresh
         )  # deal with rendering issues when toggled house tree
+
+    def set_client(self, name: str) -> None:
+        self.user = name
 
     async def load_help_menu(self):
         banner = """
