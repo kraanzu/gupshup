@@ -237,6 +237,24 @@ python-versions = ">=3.7,<4.0"
 rich = ">=11.0.0,<12.0.0"
 
 [[package]]
+name = "textual-extras"
+version = "0.1.0"
+description = "A list of widgets for textual TUI"
+category = "main"
+optional = false
+python-versions = "^3.9"
+develop = false
+
+[package.dependencies]
+textual = "^0.1.15"
+
+[package.source]
+type = "git"
+url = "https://github.com/kraanzu/textual_extras.git"
+reference = "main"
+resolved_reference = "559415dc1002e3590ef1c658e31e527dae0dd24b"
+
+[[package]]
 name = "toml"
 version = "0.10.2"
 description = "Python Library for Tom's Obvious, Minimal Language"
@@ -273,7 +291,7 @@ testing = ["coverage (>=4)", "coverage-enable-subprocess (>=1)", "flaky (>=3)", 
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "2e2adbf48b649dea44dd495238b6313657693479f5afd7e6149b0c22d3bd796d"
+content-hash = "c7c4f5cd604f7831178ff3f044c4a4551ffed98a9a9f76faf6ef8fb0502b23b7"
 
 [metadata.files]
 black = [
@@ -419,6 +437,7 @@ textual = [
     {file = "textual-0.1.15-py3-none-any.whl", hash = "sha256:b2e462b993556764d91f6d15dd1f893fc22bc0516d6ee5b6efa6aa697e792465"},
     {file = "textual-0.1.15.tar.gz", hash = "sha256:61367cb7cf0dc0e68d3e41c54916d8170f57f50a4705bd407a9feb479873146e"},
 ]
+textual-extras = []
 toml = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
     {file = "toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"},

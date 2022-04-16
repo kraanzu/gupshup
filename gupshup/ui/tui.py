@@ -13,11 +13,11 @@ from textual.driver import Driver
 from textual.app import App
 from textual.layouts.dock import DockLayout
 from textual.widgets import ScrollView, TreeClick, Static
+from textual_extras.widgets import TextInput
 
 from .widgets import (
     Headbar,
     ChatScreen,
-    TextInput,
     HouseTree,
     MemberList,
     Banner,
@@ -151,10 +151,6 @@ class Tui(App):
 
         elif event.key == "enter":
             await self.action_send_message()
-        else:
-            if self.input_box.has_focus:
-                await self.input_box.keypress(event.key)
-                event.stop()
 
     async def action_send_message(self):
         """
@@ -340,7 +336,9 @@ class Tui(App):
 
         self.title = "Welcome to Gupshup"
         self.headbar = Headbar()
-        self.input_box = TextInput(placeholder="Say something here...")
+        self.input_box = TextInput(
+            placeholder=Text("Say something here...", style="dim white")
+        )
 
         self.banner = Banner()
         self.chat_screen = defaultdict(ChatScreen)
