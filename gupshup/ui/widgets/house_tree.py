@@ -64,8 +64,13 @@ class HouseTree(CustomTree):
             + label
         )
 
-        if node.data.pending != "0":
-            icon_label += f"({node.data.pending})"
+        if node.data.type == "room":
+            if node.data.pending != "0":
+                icon_label += f"({node.data.pending})"
+        elif node.data.type == "house":
+            pending = sum(int(i.data.pending) for i in node.children)
+            if pending:
+                icon_label += f"({pending})"
 
         icon_label.apply_meta(meta)
         return icon_label
