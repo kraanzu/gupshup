@@ -179,7 +179,7 @@ class Tui(App):
         Empties the input box and sends the message to the server
         """
 
-        value = self.input_box.value.strip().strip("\n")
+        value = self.input_box.value.strip()
         if not value:
             return
 
@@ -239,6 +239,8 @@ class Tui(App):
         """
         screen = f"{message.house}/{message.room}"
         await self.chat_screen[screen].push_text(message)
+        if screen == self.current_screen:
+            await self.chat_scroll[screen].key_end()
 
         if not local:  # check if local/offline data is not being pushed
             if self.current_screen == screen:
