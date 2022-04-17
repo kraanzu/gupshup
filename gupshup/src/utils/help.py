@@ -213,8 +213,8 @@ HELP_TEXT = f"""
 Some basic navigation:
     - use {colored("ctrl+j", "bold blue")} to move to next room
     - use {colored("ctrl+k", "bold blue")} to move to prev room
-    - use {colored("ctrl+l", "bold blue")} to move to next house
-    - use {colored("ctrl+h", "bold blue")} to move to prev house
+    - use {colored("ctrl+i", "bold blue")} to move to next house
+    - use {colored("ctrl+o", "bold blue")} to move to prev house
 
 {seperator}
 

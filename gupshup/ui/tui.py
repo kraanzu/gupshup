@@ -87,8 +87,8 @@ class Tui(App):
         )
         await self.bind("ctrl+j", "move_to_next_room")
         await self.bind("ctrl+k", "move_to_prev_room")
-        await self.bind("ctrl+h", "move_to_prev_house")
-        await self.bind("ctrl+l", "move_to_next_house")
+        await self.bind("ctrl+i", "move_to_prev_house")
+        await self.bind("ctrl+o", "move_to_next_house")
 
     #     self.set_interval(
     #         1, self.refresh_widgets
