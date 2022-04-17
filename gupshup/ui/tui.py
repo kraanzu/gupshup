@@ -85,10 +85,45 @@ class Tui(App):
             "resets focus to the header",
             show=False,
         )
+        await self.bind("ctrl+j", "move_to_next_room")
+        await self.bind("ctrl+k", "move_to_prev_room")
+        await self.bind("ctrl+h", "move_to_prev_house")
+        await self.bind("ctrl+l", "move_to_next_house")
 
         self.set_interval(
             0.1, self.refresh
         )  # deal with rendering issues when toggled house tree
+
+    def get_next_room(self, diff: int):
+        parent_index = self.house_tree.get_node_index(
+            self.house_tree.root, self.current_house
+        )
+        parent = self.house_tree.root.children[parent_index]
+        child_index = self.house_tree.get_node_index(parent, self.current_room)
+        n = len(parent.children)
+        next = str(parent.children[(child_index + diff + n) % n].label)
+        return next
+
+    def get_next_house(self, diff: int):
+        parent_index = self.house_tree.get_node_index(
+            self.house_tree.root, self.current_house
+        )
+        root = self.house_tree.root
+        n = len(root.children)
+        next = str(root.children[(parent_index + diff + n) % n].label)
+        return next
+
+    async def action_move_to_prev_room(self):
+        await self.update_chat_screen(self.current_house, self.get_next_room(-1))
+
+    async def action_move_to_next_room(self):
+        await self.update_chat_screen(self.current_house, self.get_next_room(1))
+
+    async def action_move_to_prev_house(self):
+        await self.update_chat_screen(self.get_next_house(-1), "general")
+
+    async def action_move_to_next_house(self):
+        await self.update_chat_screen(self.get_next_house(1), "general")
 
     async def load_help_menu(self):
         banner = """
@@ -111,7 +146,7 @@ class Tui(App):
             edge="bottom",
             size=percent(10, os.get_terminal_size()[1]),
         )
-        await self.view.dock(ScrollView(Align.center(HELP_TEXT)))
+        await self.view.dock(self.help_scroll)
 
     async def on_key(self, event: events.Key):
         if event.key == "ctrl+p":
@@ -121,8 +156,22 @@ class Tui(App):
                 await self.load_help_menu()
 
             self.help_menu_loaded = not self.help_menu_loaded
+            return
 
-        elif event.key == "enter":
+        if self.help_menu_loaded:
+            match event.key:
+                case "j" | "down":
+                    self.help_scroll.scroll_up()
+                case "k" | "up":
+                    self.help_scroll.scroll_down()
+                case "g" | "home":
+                    await self.help_scroll.key_home()
+                case "G" | "end":
+                    await self.help_scroll.key_end()
+
+            return
+
+        if event.key == "enter":
             await self.action_send_message()
 
     async def action_send_message(self):
@@ -314,6 +363,7 @@ class Tui(App):
         )
 
         self.banner = Banner()
+        self.help_scroll = ScrollView(Align.center(HELP_TEXT))
         self.chat_screen = defaultdict(ChatScreen)
         self.chat_scroll = defaultdict(ScrollView)
 

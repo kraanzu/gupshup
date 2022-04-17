@@ -2,6 +2,9 @@ def colored(text: str, color: str) -> str:
     return f"[{color}]{text}[/{color}]"
 
 
+seperator = f"{colored('─' * 50, 'bold dim black')}"
+
+
 def make_list(cmds: list[list[str]]):
     res = ""
     for name, desc, syntax in cmds:
@@ -56,7 +59,11 @@ home_cmds = [
     ],
     [
         "archive",
-        "This is a bit different from del_room. delete_room deletes the chat and hides the room from `HOME` but archive does  not delete the chat",
+        "This is a bit different from del_room. "
+        + "\n"
+        + "      delete_room deletes the chat and hides the room from `HOME`"
+        + "\n"
+        + "      but archive does  not delete the chat",
         "/archive [name]",
     ],
     [
@@ -196,16 +203,36 @@ house_cmds = [
 ]
 
 HELP_TEXT = f"""
+
+Welcome to Gupshup ...
+Gupshup is TUI (Text User Interface) chat application with a great responsive UI and feel!
+
+{seperator}
+
+Some basic navigation:
+    - use {colored("ctrl+j", "bold blue")} to move to next room
+    - use {colored("ctrl+k", "bold blue")} to move to prev room
+    - use {colored("ctrl+l", "bold blue")} to move to next house
+    - use {colored("ctrl+h", "bold blue")} to move to prev house
+
+{seperator}
+
 {colored("Note", "blue")}:
 ( some_text ) is a mandatory field
 [ some_text ] is an optional field
 
+{seperator}
+
 {colored("Commands for HOME", "blue")}
+
 Note: name here, in some cases, is optional because you can use these commands in different ways
 like when you are in 'HOME/general' you will write        -- /ban jon_doe
 but if you are currently in jon_doe's chat you will write -- /ban
 
 {make_list(home_cmds)}
+
+{seperator}
+{seperator}
 
 { colored( "Commands for Houses", "blue" ) }
 {colored("Note", "yellow")}: commands are executed only if the user executing them has a minimum threshold
@@ -218,7 +245,15 @@ of the required power (except bye and clear_chat) There are two types of houses
 
 {make_list(house_cmds)}
 
---------------------------------
+{seperator}
+{seperator}
+
 {colored("Additional: ", "orange1")}
 available colors: https://rich.readthedocs.io/en/stable/appendix/colors.html
+
+{seperator}
+
+{colored("I hope you like this little project :heart:", "hot_pink3")}
+{colored("-- kraanzu", "light_steel_blue")}
+
 """
