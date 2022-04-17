@@ -2,14 +2,11 @@ import os
 import asyncio
 from collections import defaultdict
 from queue import Queue
-from typing import Type
 
-from rich.console import Console
 from rich.align import Align
 from rich.text import Text
 
 from textual import events
-from textual.driver import Driver
 from textual.app import App
 from textual.layouts.dock import DockLayout
 from textual.widgets import ScrollView, TreeClick, Static
@@ -39,44 +36,23 @@ class Tui(App):
         self,
         user: str,
         quiet: bool = False,
-        screen: bool = True,
-        driver_class: Type[Driver] | None = None,
-        log: str = "",
-        log_verbosity: int = 1,
-        title: str = "Textual Application",
-    ):
-        super().__init__(
-            screen=screen,
-            driver_class=driver_class,
-            log=log,
-            log_verbosity=log_verbosity,
-            title=title,
-        )
+    ) -> None:
+        super().__init__()
         self.user = user
         self.quiet = quiet
 
     @classmethod
     def run(
         cls,
-        user,
-        quiet,
-        console: Console = None,
-        screen: bool = True,
-        driver: Type[Driver] = None,
-        **kwargs,
-    ):
-        """Run the app.
-
-        Args:
-            console (Console, optional): Console object. Defaults to None.
-            screen (bool, optional): Enable application mode. Defaults to True.
-            driver (Type[Driver], optional): Driver class or None for default. Defaults to None.
+        user: str,
+        quiet: bool,
+    ) -> None:
+        """
+        Run the app.
         """
 
         async def run_app() -> None:
-            app = cls(
-                user=user, quiet=quiet, screen=screen, driver_class=driver, **kwargs
-            )
+            app = cls(user=user, quiet=quiet)
             await app.process_messages()
 
         asyncio.run(run_app())
