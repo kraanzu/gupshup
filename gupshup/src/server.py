@@ -306,7 +306,7 @@ class Server:
                 err(e)
                 return [
                     message.convert(
-                        text="[red]No such command! See help menu by pressing ctrl-h[/red]",
+                        text="[red]No such command! See help menu by pressing ctrl+p[/red]",
                     )
                 ]
 
@@ -330,7 +330,7 @@ class Server:
                         err(e)
                         return [
                             message.convert(
-                                text="[red]No such command! See help menu by pressing ctrl-h[/red]",
+                                text="[red]No such command! See help menu by pressing ctrl+p[/red]",
                             )
                         ]
 
