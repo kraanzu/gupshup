@@ -386,7 +386,7 @@ class Tui(App):
 
         await self.populate_local_data()
         await self.refresh_screen()
-        await self.house_tree.expand_toggle("HOME")
+        await self.house_tree.expand_house("HOME")
 
     async def populate_local_data(self) -> None:
         """
@@ -516,7 +516,7 @@ class Tui(App):
         if self.current_house == house and self.current_room == room:
             return
 
-        await self.house_tree.expand_toggle(self.current_house)
+        await self.house_tree.expand_house(self.current_house)
 
         self.current_house = house
         self.current_room = room
@@ -526,7 +526,7 @@ class Tui(App):
         self.banner.set_text(self.current_screen)
         self.house_tree.select(self.current_house, self.current_room)
 
-        await self.house_tree.expand_toggle(self.current_house)
+        await self.house_tree.expand_house(self.current_house)
         await self.refresh_screen()
 
     async def handle_tree_click(self, click: TreeClick) -> None:

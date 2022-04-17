@@ -83,9 +83,13 @@ class HouseTree(CustomTree):
         node = self.root.children[self.get_node_index(self.root, "HOME")]
         await node.expand()
 
-    async def expand_toggle(self, house: str):
-        parent_index = self.get_node_index(self.root, house)
-        await self.root.children[parent_index].toggle()
+    async def expand_house(self, house: str):
+        for child in self.root.children:
+            if str(child.label) == house:
+                await child.expand()
+            else:
+                if child.expanded:
+                    await child.toggle()
 
     def select(self, house: str, room: str) -> None:
         """
