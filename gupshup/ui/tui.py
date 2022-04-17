@@ -114,9 +114,6 @@ class Tui(App):
             0.1, self.refresh
         )  # deal with rendering issues when toggled house tree
 
-    def set_client(self, name: str) -> None:
-        self.user = name
-
     async def load_help_menu(self):
         banner = """
         ┬ ┬┌─┐┬  ┌─┐  ┌┬┐┌─┐┌┐┌┬ ┬
@@ -385,6 +382,8 @@ class Tui(App):
         Clean quit saving the data
         """
         self.client.save_chats()
+        self.client.close_connection()
+
         await super().action_quit()
 
     async def _clear_screen(self) -> None:

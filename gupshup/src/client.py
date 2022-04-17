@@ -56,6 +56,10 @@ class Client:
         except:
             self.try_reconnect()
 
+    def close_connection(self):
+        self.conn.close()
+        # self.channel.close()
+
     def listen_from_server(self) -> None:
         """
         Listens from server and add the messages to a working Queue
@@ -79,6 +83,8 @@ class Client:
         try:
             self.conn.connect((HOST, PORT))
             self.conn.sendall(self.name.encode())
+            self.channel.close()
+
             self.channel = Channel(self.conn)
             sleep(0.01)
             self.conn.sendall("-1".encode())

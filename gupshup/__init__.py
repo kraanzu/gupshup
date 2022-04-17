@@ -20,13 +20,14 @@ def main():
         server = Server()
         server.start_connection()
     else:
+        conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             conn.bind(("localhost", 5500))
-            conn.close()
-
             print("Can't connect to the server. Is it running?")
             exit()
 
         except OSError:
             Tui.run(args.user, args.quiet)
+
+        finally:
+            conn.close()
