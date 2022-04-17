@@ -83,6 +83,10 @@ class HouseTree(CustomTree):
         node = self.root.children[self.get_node_index(self.root, "HOME")]
         await node.expand()
 
+    async def expand_toggle(self, house: str):
+        parent_index = self.get_node_index(self.root, house)
+        await self.root.children[parent_index].toggle()
+
     def select(self, house: str, room: str) -> None:
         """
         Selects the current screen for a color hint

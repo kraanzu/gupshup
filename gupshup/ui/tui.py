@@ -90,9 +90,13 @@ class Tui(App):
         await self.bind("ctrl+h", "move_to_prev_house")
         await self.bind("ctrl+l", "move_to_next_house")
 
-        self.set_interval(
-            0.1, self.refresh
-        )  # deal with rendering issues when toggled house tree
+    #     self.set_interval(
+    #         1, self.refresh_widgets
+    #     )  # deal with rendering issues when toggled house tree
+    #
+    # def refresh_widgets(self):
+    #     for widget in self.view.named_widgets.values():
+    #         widget.refresh()
 
     def get_next_room(self, diff: int):
         parent_index = self.house_tree.get_node_index(
@@ -382,6 +386,7 @@ class Tui(App):
 
         await self.populate_local_data()
         await self.refresh_screen()
+        await self.house_tree.expand_toggle("HOME")
 
     async def populate_local_data(self) -> None:
         """
@@ -508,6 +513,7 @@ class Tui(App):
         """
         # TODO: Make this reactive
 
+        await self.house_tree.expand_toggle(self.current_house)
         if self.current_house == house and self.current_room == room:
             return
 
@@ -519,6 +525,7 @@ class Tui(App):
         self.banner.set_text(self.current_screen)
         self.house_tree.select(self.current_house, self.current_room)
 
+        await self.house_tree.expand_toggle(self.current_house)
         await self.refresh_screen()
 
     async def handle_tree_click(self, click: TreeClick) -> None:
