@@ -40,7 +40,7 @@ home_cmds = [
     [
         "ban",
         "Allows you to ban a user such that the user will not be able to text you",
-        "/ban [name]",
+        "/ban [ name ]",
     ],
     [
         "unban",
@@ -50,12 +50,12 @@ home_cmds = [
     [
         "clear_chat",
         "Allows you to clear the chat with the user the user will stay in direct chats",
-        "/clear_chat [name]",
+        "/clear_chat [ name ]",
     ],
     [
         "del_room",
         "This is a bit different from clear chat, in this the user option will be removed from direct chat",
-        "/del_chat [name]",
+        "/del_chat [ name ]",
     ],
     [
         "archive",
@@ -69,7 +69,7 @@ home_cmds = [
     [
         "toggle_silent",
         "You won't hear a notification bell if this user texts you",
-        "/toggle_silent [name]",
+        "/toggle_silent [ name ]",
     ],
 ]
 
@@ -83,7 +83,7 @@ house_cmds = [
     [
         "add_room",
         "Adds a new room to the house",
-        "/add_room (name) [icon]",
+        "/add_room (name) [ icon ]",
     ],
     [
         "del_room",
@@ -128,7 +128,7 @@ house_cmds = [
     [
         "add_rank",
         "Add a new rank in the house",
-        "/add_rank (name) [color] [icon]",
+        "/add_rank (name) [ color ] [ icon ]",
     ],
     [
         "del_rank",
@@ -204,8 +204,9 @@ house_cmds = [
 
 HELP_TEXT = f"""
 
-Welcome to Gupshup ...
-Gupshup is TUI (Text User Interface) chat application with a great responsive UI and feel!
+
+{colored("Welcome to Gupshup ...","hot_pink3")}
+{colored("Gupshup is TUI (Text User Interface) chat application with a great responsive UI and feel!" , "hot_pink3")}
 
 {seperator}
 

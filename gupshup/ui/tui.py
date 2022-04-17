@@ -399,7 +399,7 @@ class Tui(App):
         self.client.start_connection()
         self.set_interval(0.1, self.server_listen)
 
-        self.title = "Gupshup"
+        self.title = "Gupshup (Press ctrl+p for help)"
         self.refresh()
 
     async def on_resize(self, _: events.Resize) -> None:
