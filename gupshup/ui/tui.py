@@ -513,9 +513,10 @@ class Tui(App):
         """
         # TODO: Make this reactive
 
-        await self.house_tree.expand_toggle(self.current_house)
         if self.current_house == house and self.current_room == room:
             return
+
+        await self.house_tree.expand_toggle(self.current_house)
 
         self.current_house = house
         self.current_room = room
