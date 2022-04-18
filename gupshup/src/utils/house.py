@@ -278,7 +278,10 @@ class House:
         if len(params) > 1:
             x.append(
                 message.convert(
-                    action="change_room_icon", room=room, data={"icon": params[1]}
+                    action="change_room_icon",
+                    room=room,
+                    data={"icon": params[1]},
+                    reciepents=list(self.members),
                 )
             )
 
