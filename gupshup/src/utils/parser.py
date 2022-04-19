@@ -30,7 +30,8 @@ class Parser(ConfigParser):
                     pass
 
                 self._create_user_config()
-        except:
+
+        except FileNotFoundError:
             self._create_user_config()
 
     def _create_user_config(self) -> None:

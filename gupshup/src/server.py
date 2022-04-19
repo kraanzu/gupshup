@@ -38,7 +38,7 @@ class Server:
         # READS THE OFFLINE DATA PRESENT
         try:
             os.mkdir(os.path.join(HOME, ".config", "gupshup"))
-        except:
+        except FileExistsError:
             pass
 
         try:
@@ -48,7 +48,8 @@ class Server:
                     self.user_messages,
                     self.user_db,
                 ) = load(f)
-        except:
+
+        except FileNotFoundError:
             self.houses: Dict[str, House] = dict()
             self.user_messages: Dict[str, List[Message]] = dict()
             self.user_db: Dict[str, User] = dict()
@@ -86,7 +87,7 @@ class Server:
             # Send the data if possible and finally save it in DB for later sending
             try:
                 self.users[user].send(message)
-            except:
+            except BrokenPipeError:  # User closed the application on his/her side
                 pass
             finally:
                 if not from_server:

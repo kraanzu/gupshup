@@ -30,13 +30,13 @@ class Client:
 
         try:
             os.mkdir(self.GUPSHUP_FOLDER)
-        except:
+        except FileExistsError:
             pass
 
         try:
             with open(self.CHAT_DATA, "rb") as f:
                 self.chats = load(f)
-        except:
+        except FileNotFoundError:
             self.chats = []
             with open(self.CHAT_DATA, "wb") as f:
                 dump(self.chats, f)
@@ -53,7 +53,7 @@ class Client:
     def send(self, message: Message) -> None:
         try:
             self.channel.send(message)
-        except:
+        except BrokenPipeError:
             self.try_reconnect()
 
     def close_connection(self):
@@ -69,7 +69,7 @@ class Client:
                 data = self.channel.recv()
                 self.queue.put(data)
                 self.chats += (data,)
-            except:
+            except EOFError:
                 self.queue.put(Message(action="connection_disable"))
                 while not self.try_reconnect():
                     pass
@@ -107,6 +107,7 @@ class Client:
             self.conn.sendall(str(self.start).encode())
             self.channel = Channel(self.conn)
             Thread(target=self.listen_from_server, daemon=True).start()
-        except:
+
+        except ConnectionRefusedError:
             print("Looks like the server is down :(")
             exit()
