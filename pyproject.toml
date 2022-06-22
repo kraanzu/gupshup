@@ -7,7 +7,7 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-textual = "0.1.15"
+textual = "0.1.18"
 playsound = "^1.3.0"
 textual_extras = { git = "https://github.com/kraanzu/textual_extras.git", branch = "main" } #better widgets
 pyperclip = "^1.8.2"
