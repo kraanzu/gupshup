@@ -19,7 +19,7 @@ Shoutouts to [@willmcgugan](https://github.com/willmcgugan) for such a great lib
 
 ## One Liner
 ```bash
-python -m pip install git+https://github.com/kraanzu/gupshup.git
+python3 -m pip install git+https://github.com/kraanzu/gupshup.git
 ```
 
 ## Or if you prefer Manual Installation
