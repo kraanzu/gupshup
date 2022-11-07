@@ -1,3 +1,7 @@
+# ⚠️Archive⚠️
+Archiving this as the I made so many bad implementations lol XD \
+I'll make a new and better chat app soon 😄
+
 # Gupshup
 
 Gupshup is TUI (Text User Interface) chat application with a great UI and feel! </br>
